@@ -12,6 +12,8 @@
     "editor.indentSize": "tabSize",
     "editor.insertSpaces": true,
     "editor.useTabStops": true,
+    "explorer.sortOrder": "filesFirst",
+    "explorer.sortOrderReverse": true,
     "files.exclude": {
         "**/__pycache__": true
     },
