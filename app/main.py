@@ -1,8 +1,8 @@
 import logging
 
 import uvicorn
-from api.routes import router
-from core.dotenv import ConfigKey, init_dotenv
+from api.routes import api_router
+from core.dotenv import ConfigKey, dotenv_setup
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -11,14 +11,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize env settings
-settings = init_dotenv()
+settings = dotenv_setup()
 
 
 def create_app() -> FastAPI:
     fast_api_instance = FastAPI(title=settings[ConfigKey.APP_TITLE])
 
     # Include API routes
-    fast_api_instance.include_router(router, prefix="/api")
+    fast_api_instance.include_router(api_router, prefix="/api")
 
     # Global exception handler
     @fast_api_instance.exception_handler(Exception)

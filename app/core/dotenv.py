@@ -15,10 +15,10 @@ class ConfigKey(str, Enum):
     ALLOWED_ORIGINS = "ALLOWED_ORIGINS"
 
 
-def init_dotenv():
+def dotenv_setup():
     load_dotenv()
     return {
-        ConfigKey.APP_TITLE: os.getenv("APP_TITLE") or "restaurante-backend",
+        ConfigKey.APP_TITLE: os.getenv("APP_TITLE") or "backend",
         ConfigKey.HOST: os.getenv("HOST") or "0.0.0.0",
         ConfigKey.PORT: int(os.getenv("PORT") or 8000),
         ConfigKey.DEBUG: os.getenv("DEBUG") == "True",
