@@ -5,6 +5,11 @@
         "ms-python.python",
         "humao.rest-client",
         "charliermarsh.ruff",
-        "thinker.sort-json"
+        "thinker.sort-json",
+        "adamerose.markdown-wysiwyg",
+        "davidanson.vscode-markdownlint",
+        "ms-python.isort",
+        "aaron-bond.better-comments",
+        "qwtel.sqlite-viewer"
     ]
 }

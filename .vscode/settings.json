@@ -12,6 +12,9 @@
     "editor.indentSize": "tabSize",
     "editor.insertSpaces": true,
     "editor.useTabStops": true,
+    "files.exclude": {
+        "**/__pycache__": true
+    },
     "isort.args": [
         "--profile",
         "black"
