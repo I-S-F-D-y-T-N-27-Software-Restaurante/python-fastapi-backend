@@ -15,7 +15,8 @@
     "explorer.sortOrder": "filesFirst",
     "explorer.sortOrderReverse": true,
     "files.exclude": {
-        "**/__pycache__": true
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
     },
     "isort.args": [
         "--profile",
@@ -27,7 +28,8 @@
         "--disable=R0903",
         "--disable=C0103",
         "--disable=W0105",
-        "--disable=C0301"
+        "--disable=C0301",
+        "--disable=R0902"
     ],
     "python.analysis.inlayHints.callArgumentNames": "all",
     "python.analysis.inlayHints.functionReturnTypes": true,
