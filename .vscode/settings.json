@@ -1,0 +1,36 @@
+{
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "editor.autoIndent": "full",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.ruff": "always",
+        "source.organizeImports": "always"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.indentSize": "tabSize",
+    "editor.insertSpaces": true,
+    "editor.useTabStops": true,
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "pylint.args": [
+        "--disable=W1514",
+        "--disable=C0111",
+        "--disable=R0903",
+        "--disable=C0103",
+        "--disable=W0105",
+        "--disable=C0301"
+    ],
+    "python.analysis.inlayHints.callArgumentNames": "all",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.defaultInterpreterPath": ".venv/bin/python",
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.ruffEnabled": true
+}
