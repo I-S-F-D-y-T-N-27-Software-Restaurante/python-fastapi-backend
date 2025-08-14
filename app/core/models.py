@@ -1,20 +1,7 @@
 from datetime import datetime, timezone
-from typing import Optional
 
-from pydantic.dataclasses import dataclass
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.orm import DeclarativeBase
-
-from app.shared.timestamp_mixin import TimestampMixin
-
-
-@dataclass(kw_only=True)
-class UserSchema(TimestampMixin):
-    name: str
-    email: str
-    password: str
-
-    id: Optional[int] = None
 
 
 class Base(DeclarativeBase):

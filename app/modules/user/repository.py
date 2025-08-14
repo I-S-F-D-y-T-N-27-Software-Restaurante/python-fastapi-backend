@@ -3,14 +3,15 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.modules.user.model import UserModel, UserSchema
+from app.core.models import UserModel
+from app.modules.user.entity import UserEntity
 
 
 class UserRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, user_schema: UserSchema) -> UserModel:
+    def create(self, user_schema: UserEntity) -> UserModel:
         user = UserModel(
             name=user_schema.name,
             email=user_schema.email,
@@ -30,7 +31,7 @@ class UserRepository:
     def get_by_email(self, email: str) -> Optional[UserModel]:
         return self.session.query(UserModel).filter(UserModel.email == email).first()
 
-    def update(self, user_id: int, user_schema: UserSchema) -> Optional[UserModel]:
+    def update(self, user_id: int, user_schema: UserEntity) -> Optional[UserModel]:
         user = self.get_by_id(user_id)
         if not user:
             return None
