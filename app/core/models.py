@@ -3,6 +3,10 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 
+# from typing import TYPE_CHECKING
+# TODO -> check if this errors
+# if TYPE_CHECKING:
+#     from users.model import User
 
 class Base(DeclarativeBase):
     pass
