@@ -1,24 +1,26 @@
-# python-fastapi-backend
+# Python restaurant API Backend
 
-Python version 3.13.6
+Proyect Python version 3.13.6
 
 ## Activate the environment
 
-Linux/macOS:
+### Linux/macOS
 
-```bash
+```sh
 source.venv/bin/activate
 ```
 
-Windows PowerShell:
+### Windows PowerShell
 
-```powershell
+```ps
+
 .venv\Scripts\Activate.ps1
+
 ```
 
-Windows cmd:
+### Windows cmd
 
-```bat
+```cmd
 .venv\Scripts\activate.bat
 ```
 
@@ -26,4 +28,40 @@ Windows cmd:
 
 [pypi ruff url](https://pypi.org/project/ruff/)
 
-pip install ruff
+```sh
+ pip install ruff
+```
+
+## Alembic SQL migration tool
+
+### Generate migration
+
+Creates a new migration script.
+
+```sh
+ alembic revision --autogenerate -m "message"
+```
+
+### Apply migration
+
+Updates the DB to latest version.
+
+```sh
+ alembic upgrade head
+```
+
+### Downgrade
+
+Rolls back changes.
+
+```sh
+ alembic downgrade
+```
+
+### Check history
+
+Shows migration timeline.
+
+```sh
+ alembic history
+```
