@@ -6,9 +6,14 @@ from app.shared.timestamp_mixin import TimestampMixin
 
 
 @dataclass(kw_only=True)
-class UserEntity(TimestampMixin):
+class User:
     name: str
     email: str
     password: str
 
     id: Optional[int] = None
+
+
+@dataclass(kw_only=True)
+class UserEntity(User, TimestampMixin):
+    pass

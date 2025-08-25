@@ -2,7 +2,7 @@
 
 Proyect Python version 3.13.6
 
-## Activate the environment
+## First: Activate the environment
 
 ### Linux/macOS
 
@@ -24,9 +24,11 @@ source.venv/bin/activate
 .venv\Scripts\activate.bat
 ```
 
-## Ruff formater install
+## Second: copy env.example and rename to .env
 
-[pypi ruff url](https://pypi.org/project/ruff/)
+## Third (optional proyect formater): Ruff formater install
+
+[Link to package at pypi repository.](https://pypi.org/project/ruff/)
 
 ```sh
  pip install ruff
