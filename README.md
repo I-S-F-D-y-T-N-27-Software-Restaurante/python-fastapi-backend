@@ -14,7 +14,7 @@ source.venv/bin/activate
 
 ```ps
 
-.venv\Scripts\Activate.ps1
+./venv/Scripts/activate
 
 ```
 
@@ -67,3 +67,16 @@ Shows migration timeline.
 ```sh
  alembic history
 ```
+
+
+### Install requirements
+
+## Linux/macOS:
+
+pip install -r requirements.txt
+
+## Windows
+
+pip install -r requirements-windows.txt
+
+
