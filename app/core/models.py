@@ -31,6 +31,18 @@ class UserModel(Base):
         uselist=False,
     )
 
+    cook_profile = relationship(
+        "CookModel",
+        back_populates="user",
+        uselist=False,
+    )
+
+    cashier_profile = relationship(
+        "CashierModel",
+        back_populates="user",
+        uselist=False,
+    )
+
 
 class WaitressModel(Base):
     __tablename__ = "waitress"
@@ -41,13 +53,19 @@ class WaitressModel(Base):
     user = relationship("UserModel", back_populates="waitress_profile")
 
 
-# class CookModel(Base):
-#     __tablename__ = "cook"
+class CookModel(Base):
+    __tablename__ = "cook"
 
-#     id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+
+    user = relationship("UserModel", back_populates="cook_profile")
 
 
-# class CashierModel(Base):
-#     __tablename__ = "cashier"
+class CashierModel(Base):
+    __tablename__ = "cashier"
 
-#     id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+
+    user = relationship("UserModel", back_populates="cashier_profile")
