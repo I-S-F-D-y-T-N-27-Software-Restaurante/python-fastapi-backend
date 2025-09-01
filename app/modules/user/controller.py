@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 
-from .dto.user_create import UserCreate
+from .dtos import UserCreateDTO
 from .repository import UserRepository
 
 user_router = APIRouter(prefix="/users")
@@ -34,7 +34,7 @@ async def list_users():
 
 
 @user_router.post("/")
-async def create_user(user: UserCreate):
+async def create_user(user: UserCreateDTO):
     repo = UserRepository()
 
     is_registered = repo.get_by_email(user.email)
