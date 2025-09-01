@@ -14,7 +14,8 @@ class ConfigEnum(str, Enum):
     DATABASE_URL = "DATABASE_URL"
     SECRET_KEY = "SECRET_KEY"
     ACCESS_TOKEN_EXPIRE_MINUTES = "ACCESS_TOKEN_EXPIRE_MINUTES"
-    ALLOWED_ORIGINS = "ALLOWED_ORIGINS"
+    ALLOWED_ORIGINS = ("ALLOWED_ORIGINS",)
+    ENVIROMENT = "ENVIROMENT"
 
 
 class AppConfig:
@@ -33,10 +34,10 @@ class AppConfig:
         if not cls._loaded:
             load_dotenv()
             cls._settings = {
-                ConfigEnum.APP_TITLE: os.getenv("APP_TITLE", "backend"),
+                ConfigEnum.APP_TITLE: os.getenv("APP_TITLE", "python_backend"),
                 ConfigEnum.HOST: os.getenv("HOST", "0.0.0.0"),
                 ConfigEnum.PORT: int(os.getenv("PORT" or 8000)),
-                ConfigEnum.DEBUG: os.getenv("DEBUG", "False") == "True",
+                ConfigEnum.DEBUG: os.getenv("DEBUG", "False"),
                 ConfigEnum.DATABASE_URL: os.getenv(
                     "DATABASE_URL", "sqlite:///./data/sqlite.db"
                 ),
@@ -47,6 +48,7 @@ class AppConfig:
                 ConfigEnum.ALLOWED_ORIGINS: os.getenv(
                     "ALLOWED_ORIGINS", "http://localhost,http://localhost:3000"
                 ),
+                ConfigEnum.ENVIROMENT: os.getenv("ENVIROMENT", "development"),
             }
             cls._loaded = True
 

@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from app.modules.user.controller import user_router
+
 api_router = APIRouter()
 
 
@@ -11,3 +13,6 @@ async def root():
 @api_router.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+
+api_router.include_router(user_router)

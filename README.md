@@ -6,6 +6,18 @@ Proyect Python version 3.13.6
 
 ## With MAKE
 
+First execute to list available commands:
+
+```sh
+make help
+```
+
+After python vevn link and .env file setup:
+
+```sh
+make run
+```
+
 ## Manually
 
 ### Linux/macOS
@@ -49,7 +61,7 @@ User MUST copy .env.example and rename it to .env without deleting original .env
 ## Running the proyect
 
 ```sh
-python ./app/main.py
+python -m app.main
 ```
 
 ## Optional proyect formater: Ruff formater install
@@ -93,3 +105,7 @@ Shows migration timeline.
 ```sh
  alembic history
 ```
+
+## Test Requests with REST Client extension
+
+On dev/request/main.http you will find a file with request that can be tested and previewed live with one click using the REST VSCode extension recommended in .vscode workspace recomendations: humao.rest-client

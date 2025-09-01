@@ -1,0 +1,33 @@
+@port = 8000
+@host = http://localhost:{{port}}
+@users = /api/users
+
+# Get all users
+GET {{host}}{{users}} HTTP/1.1
+
+###
+# Get user by ID
+
+@get_user_request_id = 1
+GET {{host}}{{users}}{{get_user_request_id}} HTTP/1.1
+
+###
+# Create an user
+POST {{host}}{{users}} HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Alice",
+    "email": "alice@example.com",
+    "password": "1234"
+}
+
+###
+# Soft delete an user
+@soft_delete_user_id = 1
+DELETE {{host}}{{users}}/{{soft_delete_user_id}} HTTP/1.1
+
+###
+# HARD delete an user
+@hard_delete_user_id = 1
+DELETE {{host}}{{users}}/{{hard_delete_user_id}}/hard HTTP/1.1

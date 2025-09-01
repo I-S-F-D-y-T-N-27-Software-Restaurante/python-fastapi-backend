@@ -1,3 +1,5 @@
-@host = http://localhost:8000
+@port = 8000
+@host = http://localhost:{{port}}
 
+# API Health endpoint
 GET {{host}}/api/health HTTP/1.1

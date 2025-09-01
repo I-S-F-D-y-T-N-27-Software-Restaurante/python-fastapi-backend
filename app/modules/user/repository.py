@@ -1,102 +1,123 @@
 from datetime import datetime, timezone
 from typing import Optional
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
-from app.core.models import Cashier as CashierModel
-from app.core.models import Cook as CookModel
+from app.core.database import Session as SessionHandler
 from app.core.models import User as UserModel
-from app.core.models import Waiter as WaiterModel
-from app.modules.user.entities import User, UserEntity
+
+from .dtos import UserCreateDTO, UserUpdateDTO
 
 
 class UserRepository:
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, session: Optional[Session] = None):
+        if session is None:
+            self.session = SessionHandler()
+        else:
+            self.session = session
 
-    def create(self, user: User) -> UserModel:
-        user = UserModel(
+    def create(self, user: UserCreateDTO) -> UserModel:
+        new_user: UserModel = UserModel(
             name=user.name,
             email=user.email,
             password=user.password,
-            created_at=user.created_at or datetime.now(timezone.utc),
-            updated_at=user.updated_at or datetime.now(timezone.utc),
-            deleted_at=user.deleted_at,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
         )
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
-        return user
 
-    def get_by_id(self, user_id: int) -> Optional[UserModel]:
-        return self.session.query(UserModel).filter(UserModel.id == user_id).first()
+        self.session.add(new_user)
+        self.session.commit()
+        self.session.refresh(new_user)
+
+        return new_user
+
+    def get_by_id(self, user_id: int) -> UserModel | None:
+        return (
+            self.session.query(UserModel)
+            .filter(UserModel.id == user_id, UserModel.deleted_at.is_(None))
+            .first()
+        )
 
     def get_by_email(self, email: str) -> Optional[UserModel]:
         return self.session.query(UserModel).filter(UserModel.email == email).first()
 
-    def update(self, user_id: int, user_schema: UserEntity) -> Optional[UserModel]:
-        user = self.get_by_id(user_id)
+    def soft_delete(self, user_id: int) -> UserModel | None:
+        user: UserModel | None = self.get_by_id(user_id)
+
         if not user:
             return None
 
-        user.name = user_schema.name
-        user.email = user_schema.email
-        user.password = user_schema.password
-        user.updated_at = datetime.now(timezone.utc)
+        self.session.execute(
+            update(UserModel)
+            .where(UserModel.id == user_id)
+            .values(deleted_at=datetime.now(timezone.utc))
+        )
+
         self.session.commit()
-        self.session.refresh(user)
+
         return user
 
-    def delete(self, user_id: int) -> bool:
-        user = self.get_by_id(user_id)
-        if not user:
-            return False
+    def hard_delete(self, user_id: int) -> UserModel | None:
+        # This gets everything, included soft deleted records
+        user: UserModel | None = (
+            self.session.query(UserModel).filter(UserModel.id == user_id).first()
+        )
 
-        user.deleted_at = datetime.now(timezone.utc)
+        if not user:
+            return None
+
+        self.session.delete(user)
         self.session.commit()
-        return True
+
+        return user
 
     def list_all(self) -> list[UserModel]:
-        return self.session.query(UserModel).filter(UserModel.deleted_at is None).all()
+        return (
+            self.session.query(UserModel).filter(UserModel.deleted_at.is_(None)).all()
+        )
 
-    def make_waitress(self, user_id: int) -> WaiterModel:
-        user = self.get_by_id(user_id)
-        if not user:
-            raise ValueError("User not found")
+    def update(self, user_id: int, user_schema: UserUpdateDTO) -> Optional[UserModel]:
+        pass
 
-        if user.waitress_profile:
-            return user.waitress_profile
+    # def make_waitress(self, user_id: int) -> WaiterModel:
+    #     user = self.get_by_id(user_id)
+    #     if not user:
+    #         raise ValueError("User not found")
 
-        waitress = WaiterModel(user=user)
-        self.session.add(waitress)
-        self.session.commit()
-        self.session.refresh(waitress)
-        return waitress
+    #     if user.waitress_profile:
+    #         return user.waitress_profile
 
-    def make_cashier(self, user_id: int) -> CashierModel:
-        user = self.get_by_id(user_id)
-        if not user:
-            raise ValueError("User not found")
+    #     waitress = WaiterModel(user=user)
+    #     self.session.add(waitress)
+    #     self.session.commit()
+    #     self.session.refresh(waitress)
+    #     return waitress
 
-        if user.cashier_profile:
-            return user.cashier_profile
+    # def make_cashier(self, user_id: int) -> CashierModel:
+    #     user = self.get_by_id(user_id)
+    #     if not user:
+    #         raise ValueError("User not found")
 
-        cashier = CashierModel(user=user)
-        self.session.add(cashier)
-        self.session.commit()
-        self.session.refresh(cashier)
-        return cashier
+    #     if user.cashier_profile:
+    #         return user.cashier_profile
 
-    def make_cook(self, user_id: int) -> CookModel:
-        user = self.get_by_id(user_id)
-        if not user:
-            raise ValueError("User not found")
+    #     cashier = CashierModel(user=user)
+    #     self.session.add(cashier)
+    #     self.session.commit()
+    #     self.session.refresh(cashier)
+    #     return cashier
 
-        if user.cook_profile:
-            return user.cook_profile
+    # def make_cook(self, user_id: int) -> CookModel:
+    #     user = self.get_by_id(user_id)
+    #     if not user:
+    #         raise ValueError("User not found")
 
-        cook = CookModel(user=user)
-        self.session.add(cook)
-        self.session.commit()
-        self.session.refresh(cook)
-        return cook
+    #     if user.cook_profile:
+    #         return user.cook_profile
+
+    #     cook = CookModel(user=user)
+    #     self.session.add(cook)
+    #     self.session.commit()
+    #     self.session.refresh(cook)
+    #     return cook

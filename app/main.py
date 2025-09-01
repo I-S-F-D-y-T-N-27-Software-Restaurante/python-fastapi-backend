@@ -1,10 +1,11 @@
 import logging
 
 import uvicorn
-from api.routes import api_router
-from core.dotenv import ConfigEnum, settings
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
+
+from app.api.routes import api_router
+from app.core.dotenv import ConfigEnum, settings
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +39,7 @@ app = create_app()
 if __name__ == "__main__":
     try:
         uvicorn.run(
-            "main:app",
+            "app.main:app",
             host=settings.get(key=ConfigEnum.HOST),
             port=settings.get(key=ConfigEnum.PORT),
             reload=True,

@@ -3,7 +3,7 @@ PYTHON = python
 VENV = .venv
 REQ_LINUX = requirements.txt
 REQ_WINDOWS = requirements-windows.txt
-MAIN = ./app/main.py
+MAIN = app.main
 
 .PHONY: help env install run copy-env
 
@@ -31,4 +31,4 @@ copy-env:
 	@if [ ! -f .env ]; then cp .env.example .env; fi
 
 run:
-	$(PYTHON) $(MAIN)
+	$(PYTHON) -m $(MAIN)
