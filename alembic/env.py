@@ -16,9 +16,44 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # TODO -> check import
-from app.core.models import Base, UserModel
+# from app.core.models import Base, UserModel
+# UserModel
 
-UserModel
+from app.core.models import (
+    Admin,
+    Audit,
+    Base,
+    Cashier,
+    Cook,
+    Invoice,
+    MenuItem,
+    Order,
+    OrderItem,
+    OrderStatus,
+    Payment,
+    PaymentMethod,
+    Preparation,
+    Table,
+    User,
+    Waiter,
+)
+
+Admin
+Audit
+Cashier
+Cook
+Invoice
+MenuItem
+Order
+OrderItem
+OrderStatus
+Payment
+PaymentMethod
+Preparation
+Table
+User
+Waiter
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

@@ -1,7 +1,7 @@
 [tool.ruff]
 line-length = 88
 fix = true
-exclude = ["tests/*", ".venv/*"]
+exclude = ["tests/*", ".venv/*", "alembic/env.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C", "B", "I"]

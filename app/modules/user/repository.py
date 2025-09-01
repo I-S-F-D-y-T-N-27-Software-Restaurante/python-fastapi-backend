@@ -3,7 +3,10 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.core.models import CashierModel, CookModel, UserModel, WaitressModel
+from app.core.models import Cashier as CashierModel
+from app.core.models import Cook as CookModel
+from app.core.models import User as UserModel
+from app.core.models import Waiter as WaiterModel
 from app.modules.user.entities import User, UserEntity
 
 
@@ -56,7 +59,7 @@ class UserRepository:
     def list_all(self) -> list[UserModel]:
         return self.session.query(UserModel).filter(UserModel.deleted_at is None).all()
 
-    def make_waitress(self, user_id: int) -> WaitressModel:
+    def make_waitress(self, user_id: int) -> WaiterModel:
         user = self.get_by_id(user_id)
         if not user:
             raise ValueError("User not found")
@@ -64,7 +67,7 @@ class UserRepository:
         if user.waitress_profile:
             return user.waitress_profile
 
-        waitress = WaitressModel(user=user)
+        waitress = WaiterModel(user=user)
         self.session.add(waitress)
         self.session.commit()
         self.session.refresh(waitress)

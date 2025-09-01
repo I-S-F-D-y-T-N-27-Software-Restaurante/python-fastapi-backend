@@ -1,19 +1,21 @@
 from typing import Optional
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
+from app.modules.resto.entities import Admin, Cashier, Cook, Waiter
 from app.shared.timestamp_mixin import TimestampMixin
 
 
-@dataclass(kw_only=True)
-class User:
+class User(BaseModel):
     name: str
     email: str
     password: str
 
-    id: Optional[int] = None
 
-
-@dataclass(kw_only=True)
 class UserEntity(User, TimestampMixin):
-    pass
+    id: int
+
+    waiter_profile: Optional["Waiter"] = None
+    cook_profile: Optional["Cook"] = None
+    cashier_profile: Optional["Cashier"] = None
+    admin_profile: Optional["Admin"] = None

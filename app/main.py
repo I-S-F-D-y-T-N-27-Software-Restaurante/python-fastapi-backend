@@ -4,7 +4,7 @@ import uvicorn
 from api.routes import api_router
 from core.dotenv import ConfigEnum, settings
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -16,6 +16,10 @@ def create_app() -> FastAPI:
 
     # Include API routes
     fast_api_instance.include_router(api_router, prefix="/api")
+
+    @fast_api_instance.get("/favicon.ico")
+    async def favicon():
+        return Response(status_code=204)
 
     # Global exception handler
     @fast_api_instance.exception_handler(Exception)

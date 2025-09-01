@@ -2,7 +2,11 @@
 
 Proyect Python version 3.13.6
 
-## First: Activate the environment
+## Activate the environment
+
+## With MAKE
+
+## Manually
 
 ### Linux/macOS
 
@@ -24,9 +28,31 @@ source.venv/bin/activate
 .venv\Scripts\activate.bat
 ```
 
-## Second: copy env.example and rename to .env
+## Install requirements
 
-## Third (optional proyect formater): Ruff formater install
+### Linux/macOS
+
+```sh
+pip install -r requirements.txt
+```
+
+## Windows
+
+```ps
+pip install -r requirements-windows.txt
+```
+
+## IMPORTANT: Env setup
+
+User MUST copy .env.example and rename it to .env without deleting original .env.example file. Otherwise proyect wont start.
+
+## Running the proyect
+
+```sh
+python ./app/main.py
+```
+
+## Optional proyect formater: Ruff formater install
 
 [Link to package at pypi repository.](https://pypi.org/project/ruff/)
 
@@ -67,16 +93,3 @@ Shows migration timeline.
 ```sh
  alembic history
 ```
-
-
-### Install requirements
-
-## Linux/macOS:
-
-pip install -r requirements.txt
-
-## Windows
-
-pip install -r requirements-windows.txt
-
-
