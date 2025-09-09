@@ -5,4 +5,5 @@ exclude = ["tests/*", ".venv/*", "alembic/env.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C", "B", "I"]
-ignore = ["E203"]
+ignore = ["E203", "F401"]  # F401 = unused imports
+

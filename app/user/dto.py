@@ -8,6 +8,9 @@ class UserCreateDTO(BaseModel):
     email: str
     password: str
 
+    class Config:
+        from_attributes = True
+
 
 class UserUpdateDTO(BaseModel):
     name: Optional[str]

@@ -2,13 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from app.shared.timestamp_mixin import TimestampMixin
-
-
-class User(BaseModel):
-    name: str
-    email: str
-    password: str
+from app.config.types import TimestampMixin
 
 
 class UserEntity(User, TimestampMixin):
