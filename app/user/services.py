@@ -1,32 +1,31 @@
 import logging
 from datetime import datetime, timezone
-from typing import Optional
 
-from dto import UserCreateDTO
-from model import User
 from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config.cnx import SessionLocal
+from app.user.dto import UserCreateDTO
+from app.user.model import User
 
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(level=logging.INFO)
 
 
-def get_user_by_id(user_id: int) -> Optional[User]:
+def get_user_by_id(user_id: int):
     with SessionLocal() as db:
         return (
             db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
         )
 
 
-def get_user_by_email(email: str) -> Optional[User]:
+def get_user_by_email(email: str):
     with SessionLocal() as db:
         return db.query(User).filter(User.email == email).first()
 
 
-def get_all_users() -> list[User]:
+def get_all_users():
     with SessionLocal() as db:
         users = db.query(User).filter(User.deleted_at.is_(None)).all()
         logger.info(f"{len(users)} users were retrieved")
@@ -34,7 +33,7 @@ def get_all_users() -> list[User]:
         return users
 
 
-def create_user(user: UserCreateDTO) -> User:
+def create_user(user: UserCreateDTO):
     new_user = User(
         name=user.name,
         email=user.email,
@@ -62,7 +61,7 @@ def create_user(user: UserCreateDTO) -> User:
         raise
 
 
-def soft_delete_user(user_id: int) -> Optional[User]:
+def soft_delete_user(user_id: int):
     user = get_user_by_id(user_id)
 
     if not user:
@@ -86,7 +85,7 @@ def soft_delete_user(user_id: int) -> Optional[User]:
         raise
 
 
-def hard_delete_user(user_id: int) -> Optional[User]:
+def hard_delete_user(user_id: int):
     try:
         with SessionLocal() as db:
             # Fetch user, including soft-deleted ones

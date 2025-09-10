@@ -1,7 +1,10 @@
-from dto import UserCreateDTO
+from typing import List
+
 from fastapi import APIRouter, HTTPException, status
-from model import User
-from services import (
+
+from app.user.dto import UserCreateDTO, UserResponseDTO
+from app.user.model import User
+from app.user.services import (
     create_user,
     get_all_users,
     get_user_by_email,

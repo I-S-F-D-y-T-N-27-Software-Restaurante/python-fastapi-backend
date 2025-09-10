@@ -39,9 +39,10 @@ def create_app() -> FastAPI:
     return server
 
 
+app = create_app()
+
 if __name__ == "__main__":
     try:
-        app = create_app()
         uvicorn.run(
             "app.main:app",
             host=HOST,
