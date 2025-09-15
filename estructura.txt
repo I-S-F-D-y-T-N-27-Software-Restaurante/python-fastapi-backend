@@ -1,0 +1,85 @@
+Listado de rutas de carpetas
+El número de serie del volumen es D011-C902
+C:.
+¦   .editorconfig
+¦   .env.example
+¦   .gitignore
+¦   .pylintrc
+¦   alembic.ini
+¦   estructura.txt
+¦   Makefile
+¦   pyproject.toml
+¦   README.md
+¦   requirements-windows.txt
+¦   requirements.txt
+¦   
++---.vscode
+¦       extensions.json
+¦       settings.json
+¦       
++---alembic
+¦   ¦   env.py
+¦   ¦   README
+¦   ¦   script.py.mako
+¦   ¦   
+¦   +---versions
+¦           704794c70a4b_message.py
+¦           7d4171da0399_init_relationships.py
+¦           9f5e85ee445d_message.py
+¦           
++---app
+¦   ¦   main.py
+¦   ¦   
+¦   +---admin
+¦   ¦       dto.py
+¦   ¦       model.py
+¦   ¦       
+¦   +---config
+¦   ¦       basemodel.py
+¦   ¦       cnx.py
+¦   ¦       types.py
+¦   ¦       __init__.py
+¦   ¦       
+¦   +---data
+¦   ¦       database.sqlite
+¦   ¦       static.json
+¦   ¦       
+¦   +---default
+¦   ¦       routes.py
+¦   ¦       
+¦   +---payment
+¦   ¦       dto.py
+¦   ¦       model.py
+¦   ¦       route.py
+¦   ¦       services.py
+¦   ¦       
+¦   +---resto
+¦   ¦       dto.py
+¦   ¦       model.py
+¦   ¦       route.py
+¦   ¦       services.py
+¦   ¦       
+¦   +---user
+¦           dto.py
+¦           model.py
+¦           route.py
+¦           services.py
+¦           
++---dev
+    ¦   board.excalidraw
+    ¦   changelog.md
+    ¦   commit.md
+    ¦   dev.py
+    ¦   git-flow.png
+    ¦   
+    +---promps
+    ¦       conventional_commit.txt
+    ¦       create_request.txt
+    ¦       
+    +---ref
+    ¦       entities.old.py
+    ¦       
+    +---requests
+            main.http
+            users.http
+            

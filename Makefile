@@ -3,7 +3,7 @@ PYTHON = python
 VENV = .venv
 REQ_LINUX = requirements.txt
 REQ_WINDOWS = requirements-windows.txt
-MAIN = app.main
+MAIN = main
 
 .PHONY: help env install run copy-env
 
