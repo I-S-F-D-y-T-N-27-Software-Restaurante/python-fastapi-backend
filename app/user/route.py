@@ -13,23 +13,22 @@ from app.user.services import (
 
 user_router = APIRouter(prefix="/users")
 
-
-@user_router.get("/", response_model=None, status_code=status.HTTP_200_OK)
+@user_router.get("/", response_model=User, status_code=status.HTTP_200_OK)
 async def list_users():
     return get_all_users()
 
 
-@user_router.post("/", response_model=None, status_code=status.HTTP_200_OK)
-async def register_user(user: UserCreate):
-    is_registered = get_user_by_email(user.email)
+# @user_router.post("/", response_model=None, status_code=status.HTTP_200_OK)
+# async def register_user(user: UserCreate):
+#     is_registered = get_user_by_email(user.email)
 
-    if is_registered is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email is already registered",
-        )
+#     if is_registered is not None:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail="Email is already registered",
+#         )
 
-    return create_user(user)
+#     return create_user(user)
 
 
 # @user_router.delete("/{user_id}", response_model=User, status_code=status.HTTP_200_OK)

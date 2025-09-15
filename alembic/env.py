@@ -20,18 +20,21 @@ if config.config_file_name is not None:
 from app.admin.model import Admin, Audit
 from app.config.basemodel import Base
 from app.payment.model import Invoice, Payment, PaymentMethod
-from app.resto.model import (
-    Cashier,
-    Cook,
-    MenuItem,
-    Order,
-    OrderItem,
-    OrderStatus,
-    Preparation,
-    RestorantTable,
-    Waiter,
-)
+from app.resto.model import Cashier, Cook, Waiter
 from app.user.model import User
+
+# from app.resto.model import (
+#     Cashier,
+#     Cook,
+#     MenuItem,
+#     Order,
+#     OrderItem,
+#     OrderStatus,
+#     Preparation,
+#     RestorantTable,
+#     Waiter,
+# )
+
 
 target_metadata = Base.metadata
 

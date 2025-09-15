@@ -20,51 +20,53 @@ class Waiter(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True)
     user: Mapped["User"] = relationship("User", back_populates="waiter_profile")
 
-    tables: Mapped[list["RestorantTable"]] = relationship(
-        "Table", back_populates="waiter"
-    )
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="waiter")
+    # tables: Mapped[list["RestorantTable"]] = relationship(
+    #     "RestorantTable", back_populates="waiter"
+    # )
+    # orders: Mapped[list["Order"]] = relationship("Order", back_populates="waiter")
 
 
-class RestorantTable(Base, TimestampMixin):
-    __tablename__ = "tables"
+# class RestorantTable(Base, TimestampMixin):
+#     __tablename__ = "tables"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    number: Mapped[int] = mapped_column(nullable=False)
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     number: Mapped[int] = mapped_column(nullable=False)
 
-    waiter_id: Mapped[int] = mapped_column(ForeignKey("waiters.id"))
-    order_status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
+#     waiter_id: Mapped[int] = mapped_column(ForeignKey("waiters.id"))
+#     order_status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
 
-    occupied: Mapped[bool] = mapped_column(Boolean, default=False)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+#     occupied: Mapped[bool] = mapped_column(Boolean, default=False)
+#     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    waiter: Mapped[Waiter] = relationship("Waiter", back_populates="tables")
-    order_status: Mapped["OrderStatus"] = relationship(
-        "OrderStatus", back_populates="tables"
-    )
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="table")
+#     waiter: Mapped[Waiter] = relationship("Waiter", back_populates="tables")
+#     order_status: Mapped["OrderStatus"] = relationship(
+#         "OrderStatus", back_populates="RestorantTable"
+#     )
+#     orders: Mapped[list["Order"]] = relationship("Order", back_populates="table")
 
 
-class Order(Base, TimestampMixin):
-    __tablename__ = "orders"
+# class Order(Base, TimestampMixin):
+#     __tablename__ = "orders"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    table_id: Mapped[int] = mapped_column(ForeignKey("tables.id"))
-    waiter_id: Mapped[int] = mapped_column(ForeignKey("waiters.id"))
-    status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
+#     table_id: Mapped[int] = mapped_column(ForeignKey("RestorantTable.id"))
+#     waiter_id: Mapped[int] = mapped_column(ForeignKey("waiters.id"))
+#     status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
 
-    total: Mapped[DECIMAL] = mapped_column(DECIMAL)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+#     total: Mapped[DECIMAL] = mapped_column(DECIMAL)
+#     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    table: Mapped["RestorantTable"] = relationship("Table", back_populates="orders")
-    waiter: Mapped["Waiter"] = relationship("Waiter", back_populates="orders")
-    status: Mapped["OrderStatus"] = relationship("OrderStatus", back_populates="orders")
-    items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
-    payments: Mapped[list["Payment"]] = relationship("Payment", back_populates="order")
-    invoice: Mapped["Invoice"] = relationship(
-        "Invoice", back_populates="order", uselist=False
-    )
+#     table: Mapped["RestorantTable"] = relationship(
+#         "RestorantTable", back_populates="orders"
+#     )
+#     waiter: Mapped["Waiter"] = relationship("Waiter", back_populates="orders")
+#     status: Mapped["OrderStatus"] = relationship("OrderStatus", back_populates="orders")
+#     items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
+#     payments: Mapped[list["Payment"]] = relationship("Payment", back_populates="order")
+#     invoice: Mapped["Invoice"] = relationship(
+#         "Invoice", back_populates="order", uselist=False
+#     )
 
 
 class Cook(Base):
@@ -75,75 +77,75 @@ class Cook(Base):
 
     user: Mapped["User"] = relationship("User", back_populates="cook_profile")
 
-    preparations: Mapped[list["Preparation"]] = relationship(
-        "Preparation", back_populates="cook"
-    )
+    # preparations: Mapped[list["Preparation"]] = relationship(
+    #     "Preparation", back_populates="cook"
+    # )
 
 
-class Preparation(Base, TimestampMixin):
-    __tablename__ = "preparations"
+# class Preparation(Base, TimestampMixin):
+#     __tablename__ = "preparations"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    order_item_id: Mapped[int] = mapped_column(ForeignKey("order_items.id"))
-    cook_id: Mapped[int] = mapped_column(ForeignKey("cooks.id"))
-    status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
+#     order_item_id: Mapped[int] = mapped_column(ForeignKey("order_items.id"))
+#     cook_id: Mapped[int] = mapped_column(ForeignKey("cooks.id"))
+#     status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
 
-    cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
-    cancellation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+#     cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
+#     cancellation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    order_item: Mapped["OrderItem"] = relationship(
-        "OrderItem", back_populates="preparations"
-    )
-    cook: Mapped["Cook"] = relationship("Cook", back_populates="preparations")
-    status: Mapped[OrderStatus] = relationship(
-        "OrderStatus", back_populates="preparations"
-    )
-
-
-class OrderStatus(Base):
-    __tablename__ = "order_statuses"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-
-    tables: Mapped[list["RestorantTable"]] = relationship(
-        "Table", back_populates="order_status"
-    )
-    orders: Mapped[list["Order"]] = relationship("Order", back_populates="status")
-    preparations: Mapped[list["Preparation"]] = relationship(
-        "Preparation", back_populates="status"
-    )
+#     order_item: Mapped["OrderItem"] = relationship(
+#         "OrderItem", back_populates="preparations"
+#     )
+#     cook: Mapped["Cook"] = relationship("Cook", back_populates="preparations")
+#     status: Mapped[OrderStatus] = relationship(
+#         "OrderStatus", back_populates="preparations"
+#     )
 
 
-class OrderItem(Base):
-    __tablename__ = "order_items"
+# class OrderStatus(Base):
+#     __tablename__ = "order_statuses"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
-    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
-    menu_item_id: Mapped[int] = mapped_column(ForeignKey("menu_items.id"))
-
-    quantity: Mapped[int] = mapped_column(nullable=False)
-    unit_price: Mapped[DECIMAL] = mapped_column(DECIMAL)
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-    order: Mapped["Order"] = relationship("Order", back_populates="items")
-    menu_item: Mapped["MenuItem"] = relationship("MenuItem")
-    preparations: Mapped[list["Preparation"]] = relationship(
-        "Preparation", back_populates="order_item"
-    )
+#     tables: Mapped[list["RestorantTable"]] = relationship(
+#         "RestorantTable", back_populates="order_status"
+#     )
+#     orders: Mapped[list["Order"]] = relationship("Order", back_populates="status")
+#     preparations: Mapped[list["Preparation"]] = relationship(
+#         "Preparation", back_populates="status"
+#     )
 
 
-class MenuItem(Base):
-    __tablename__ = "menu_items"
+# class OrderItem(Base):
+#     __tablename__ = "order_items"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    price: Mapped[DECIMAL] = mapped_column(DECIMAL)
-    available: Mapped[bool] = mapped_column(Boolean, default=True)
-    category: Mapped[str | None] = mapped_column(String, nullable=True)
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+#     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
+#     menu_item_id: Mapped[int] = mapped_column(ForeignKey("menu_items.id"))
+
+#     quantity: Mapped[int] = mapped_column(nullable=False)
+#     unit_price: Mapped[DECIMAL] = mapped_column(DECIMAL)
+#     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+#     order: Mapped["Order"] = relationship("Order", back_populates="items")
+#     menu_item: Mapped["MenuItem"] = relationship("MenuItem")
+#     preparations: Mapped[list["Preparation"]] = relationship(
+#         "Preparation", back_populates="order_item"
+#     )
+
+
+# class MenuItem(Base):
+#     __tablename__ = "menu_items"
+
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     name: Mapped[str] = mapped_column(String, nullable=False)
+#     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+#     price: Mapped[DECIMAL] = mapped_column(DECIMAL)
+#     available: Mapped[bool] = mapped_column(Boolean, default=True)
+#     category: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class Cashier(Base):
@@ -153,6 +155,6 @@ class Cashier(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True)
     user: Mapped["User"] = relationship("User", back_populates="cashier_profile")
 
-    payments: Mapped[list["Payment"]] = relationship(
-        "Payment", back_populates="cashier"
-    )
+    # payments: Mapped[list["Payment"]] = relationship(
+    #     "Payment", back_populates="cashier"
+    # )

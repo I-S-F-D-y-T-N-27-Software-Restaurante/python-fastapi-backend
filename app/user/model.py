@@ -10,6 +10,7 @@ from app.config.types import TimestampMixin
 
 if TYPE_CHECKING:
     from app.resto.model import Cashier, Cook, Waiter
+# from app.resto.model import Cashier, Cook, Waiter
 
 
 class User(Base, TimestampMixin):
