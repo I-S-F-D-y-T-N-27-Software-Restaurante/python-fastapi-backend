@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DECIMAL, Boolean, ForeignKey, String, Text
+from sqlalchemy import DECIMAL, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.config.basemodel import Base
@@ -16,14 +16,17 @@ if TYPE_CHECKING:
 class Waiter(Base):
     __tablename__ = "waiters"
 
-    id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    user: Mapped[User] = relationship("User", back_populates="waiter_profile")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True)
+    user: Mapped["User"] = relationship("User", back_populates="waiter_profile")
 
-    tables: Mapped[list[Table]] = relationship("Table", back_populates="waiter")
-    orders: Mapped[list[Order]] = relationship("Order", back_populates="waiter")
+    tables: Mapped[list["RestorantTable"]] = relationship(
+        "Table", back_populates="waiter"
+    )
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="waiter")
 
 
-class Table(Base, TimestampMixin):
+class RestorantTable(Base, TimestampMixin):
     __tablename__ = "tables"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -39,7 +42,7 @@ class Table(Base, TimestampMixin):
     order_status: Mapped["OrderStatus"] = relationship(
         "OrderStatus", back_populates="tables"
     )
-    orders: Mapped[list[Order]] = relationship("Order", back_populates="table")
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="table")
 
 
 class Order(Base, TimestampMixin):
@@ -54,12 +57,12 @@ class Order(Base, TimestampMixin):
     total: Mapped[DECIMAL] = mapped_column(DECIMAL)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    table: Mapped[Table] = relationship("Table", back_populates="orders")
-    waiter: Mapped[Waiter] = relationship("Waiter", back_populates="orders")
-    status: Mapped[OrderStatus] = relationship("OrderStatus", back_populates="orders")
-    items: Mapped[list[OrderItem]] = relationship("OrderItem", back_populates="order")
-    payments: Mapped[list[Payment]] = relationship("Payment", back_populates="order")
-    invoice: Mapped[Invoice] = relationship(
+    table: Mapped["RestorantTable"] = relationship("Table", back_populates="orders")
+    waiter: Mapped["Waiter"] = relationship("Waiter", back_populates="orders")
+    status: Mapped["OrderStatus"] = relationship("OrderStatus", back_populates="orders")
+    items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
+    payments: Mapped[list["Payment"]] = relationship("Payment", back_populates="order")
+    invoice: Mapped["Invoice"] = relationship(
         "Invoice", back_populates="order", uselist=False
     )
 
@@ -67,8 +70,10 @@ class Order(Base, TimestampMixin):
 class Cook(Base):
     __tablename__ = "cooks"
 
-    id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    user: Mapped[User] = relationship("User", back_populates="cook_profile")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True)
+
+    user: Mapped["User"] = relationship("User", back_populates="cook_profile")
 
     preparations: Mapped[list["Preparation"]] = relationship(
         "Preparation", back_populates="cook"
@@ -87,10 +92,10 @@ class Preparation(Base, TimestampMixin):
     cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
     cancellation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    order_item: Mapped[OrderItem] = relationship(
+    order_item: Mapped["OrderItem"] = relationship(
         "OrderItem", back_populates="preparations"
     )
-    cook: Mapped[Cook] = relationship("Cook", back_populates="preparations")
+    cook: Mapped["Cook"] = relationship("Cook", back_populates="preparations")
     status: Mapped[OrderStatus] = relationship(
         "OrderStatus", back_populates="preparations"
     )
@@ -102,8 +107,10 @@ class OrderStatus(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
-    tables: Mapped[list[Table]] = relationship("Table", back_populates="order_status")
-    orders: Mapped[list[Order]] = relationship("Order", back_populates="status")
+    tables: Mapped[list["RestorantTable"]] = relationship(
+        "Table", back_populates="order_status"
+    )
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="status")
     preparations: Mapped[list["Preparation"]] = relationship(
         "Preparation", back_populates="status"
     )
@@ -121,9 +128,9 @@ class OrderItem(Base):
     unit_price: Mapped[DECIMAL] = mapped_column(DECIMAL)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    order: Mapped[Order] = relationship("Order", back_populates="items")
-    menu_item: Mapped[MenuItem] = relationship("MenuItem")
-    preparations: Mapped[list[Preparation]] = relationship(
+    order: Mapped["Order"] = relationship("Order", back_populates="items")
+    menu_item: Mapped["MenuItem"] = relationship("MenuItem")
+    preparations: Mapped[list["Preparation"]] = relationship(
         "Preparation", back_populates="order_item"
     )
 
@@ -142,6 +149,10 @@ class MenuItem(Base):
 class Cashier(Base):
     __tablename__ = "cashiers"
 
-    id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    user: Mapped[User] = relationship("User", back_populates="cashier_profile")
-    payments: Mapped[list[Payment]] = relationship("Payment", back_populates="cashier")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), unique=True)
+    user: Mapped["User"] = relationship("User", back_populates="cashier_profile")
+
+    payments: Mapped[list["Payment"]] = relationship(
+        "Payment", back_populates="cashier"
+    )

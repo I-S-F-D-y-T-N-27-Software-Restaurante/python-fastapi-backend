@@ -20,12 +20,16 @@ class User(Base, TimestampMixin):
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
 
-    waiter_profile: Mapped[Waiter] = relationship(
-        "Waiter", back_populates="user", uselist=False
+    waiter_profile: Mapped["Waiter"] = relationship(
+        "Waiter",
+        back_populates="user",
+        uselist=False,
     )
-    cook_profile: Mapped[Cook] = relationship(
+    cook_profile: Mapped["Cook"] = relationship(
         "Cook", back_populates="user", uselist=False
     )
-    cashier_profile: Mapped[Cashier] = relationship(
-        "Cashier", back_populates="user", uselist=False
+    cashier_profile: Mapped["Cashier"] = relationship(
+        "Cashier",
+        back_populates="user",
+        uselist=False,
     )

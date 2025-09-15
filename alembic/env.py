@@ -28,7 +28,7 @@ from app.resto.model import (
     OrderItem,
     OrderStatus,
     Preparation,
-    Table,
+    RestorantTable,
     Waiter,
 )
 from app.user.model import User

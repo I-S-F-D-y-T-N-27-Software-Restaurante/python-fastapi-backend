@@ -5,7 +5,7 @@ from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config.cnx import SessionLocal
-from app.user.dto import UserCreateDTO
+from app.user.dto import UserCreate
 from app.user.model import User
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def get_all_users():
         return users
 
 
-def create_user(user: UserCreateDTO):
+def create_user(user: UserCreate):
     new_user = User(
         name=user.name,
         email=user.email,

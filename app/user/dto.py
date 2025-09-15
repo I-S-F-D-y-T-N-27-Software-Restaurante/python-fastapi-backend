@@ -4,19 +4,17 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 
-class UserCreateDTO(BaseModel):
+class UserBase(BaseModel):
     name: str
     email: EmailStr
+
+
+class UserCreate(UserBase):
     password: str
 
-    class Config:
-        from_attributes = True
 
-
-class UserResponseDTO(BaseModel):
+class User(UserBase):
     id: int
-    name: str
-    email: EmailStr
     created_at: datetime
     updated_at: datetime
 
@@ -24,7 +22,28 @@ class UserResponseDTO(BaseModel):
         from_attributes = True
 
 
-class UserUpdateDTO(BaseModel):
-    name: Optional[str]
-    email: Optional[str]
-    password: Optional[str]
+class WaiterProfile(BaseModel):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class CookProfile(BaseModel):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class CashierProfile(BaseModel):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class UserWithProfiles(User):
+    waiter_profile: Optional["WaiterProfile"] = None
+    cook_profile: Optional["CookProfile"] = None
+    cashier_profile: Optional["CashierProfile"] = None
