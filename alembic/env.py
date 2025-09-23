@@ -23,19 +23,6 @@ from app.payment.model import Invoice, Payment, PaymentMethod
 from app.resto.model import Cashier, Cook, Waiter
 from app.user.model import User
 
-# from app.resto.model import (
-#     Cashier,
-#     Cook,
-#     MenuItem,
-#     Order,
-#     OrderItem,
-#     OrderStatus,
-#     Preparation,
-#     RestorantTable,
-#     Waiter,
-# )
-
-
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

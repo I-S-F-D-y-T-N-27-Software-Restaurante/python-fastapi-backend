@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from sqlalchemy import DECIMAL, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.config.basemodel import Base
-from app.config.types import TimestampMixin
 
 if TYPE_CHECKING:
     from app.resto.model import Cashier, Order
 
 
-class Payment(Base, TimestampMixin):
+class Payment(Base):
     __tablename__ = "payments"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -27,11 +26,21 @@ class Payment(Base, TimestampMixin):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     discounts_applied: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    order: Mapped[Order] = relationship("Order", back_populates="payments")
-    cashier: Mapped[Cashier] = relationship("Cashier", back_populates="payments")
-    method: Mapped[PaymentMethod] = relationship(
+    order: Mapped["Order"] = relationship("Order", back_populates="payments")
+    cashier: Mapped["Cashier"] = relationship("Cashier", back_populates="payments")
+    method: Mapped["PaymentMethod"] = relationship(
         "PaymentMethod", back_populates="payments"
     )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class PaymentMethod(Base):
@@ -40,10 +49,10 @@ class PaymentMethod(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
-    payments: Mapped[list[Payment]] = relationship("Payment", back_populates="method")
+    payments: Mapped[list["Payment"]] = relationship("Payment", back_populates="method")
 
 
-class Invoice(Base, TimestampMixin):
+class Invoice(Base):
     __tablename__ = "invoices"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -55,3 +64,13 @@ class Invoice(Base, TimestampMixin):
     details: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     order: Mapped[Order] = relationship("Order", back_populates="invoice")
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

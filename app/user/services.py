@@ -28,8 +28,6 @@ def get_user_by_email(email: str):
 def get_all_users():
     with SessionLocal() as db:
         users = db.query(User).filter(User.deleted_at.is_(None)).all()
-        logger.info(f"{len(users)} users were retrieved")
-        logger.info(f"first entry is {users[0]}")
         return users
 
 

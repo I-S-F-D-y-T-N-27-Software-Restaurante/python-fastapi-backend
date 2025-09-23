@@ -1,19 +1,17 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, String
+from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.config.basemodel import Base
-from app.config.types import TimestampMixin
 
 if TYPE_CHECKING:
     from app.resto.model import Cashier, Cook, Waiter
-# from app.resto.model import Cashier, Cook, Waiter
 
-
-class User(Base, TimestampMixin):
+class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -34,3 +32,13 @@ class User(Base, TimestampMixin):
         back_populates="user",
         uselist=False,
     )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
