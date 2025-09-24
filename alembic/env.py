@@ -17,21 +17,18 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 
-from app.admin.model import Admin, Audit
 from app.config.basemodel import Base
-from app.payment.model import Invoice, Payment, PaymentMethod
-from app.resto.model import (
+from app.config.sql_models import (
+    Admin,
+    Audit,
     Cashier,
     Cook,
-    MenuItem,
-    Order,
-    OrderItem,
-    OrderStatus,
-    Preparation,
-    RestorantTable,
+    Invoice,
+    Payment,
+    PaymentMethod,
+    User,
     Waiter,
 )
-from app.user.model import User
 
 target_metadata = Base.metadata
 
