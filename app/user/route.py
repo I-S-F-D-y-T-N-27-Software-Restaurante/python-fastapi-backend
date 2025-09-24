@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.user.dto import UserCreate, UserSchema
+from app.user.dto import UserBaseDTO, UserCreateDTO, UserDeleteDTO
 from app.user.services import (
     create_user,
     get_all_users,
@@ -15,13 +15,13 @@ from app.user.services import (
 user_router = APIRouter(prefix="/users")
 
 
-@user_router.get("/", response_model=List[UserSchema], status_code=status.HTTP_200_OK)
+@user_router.get("/", response_model=List[UserBaseDTO], status_code=status.HTTP_200_OK)
 async def list_users():
     return get_all_users()
 
 
-@user_router.post("/", response_model=UserSchema, status_code=status.HTTP_200_OK)
-async def register_user(user: UserCreate):
+@user_router.post("/", response_model=UserBaseDTO, status_code=status.HTTP_200_OK)
+async def register_user(user: UserCreateDTO):
     is_registered = get_user_by_email(user.email)
 
     if is_registered is not None:
@@ -34,7 +34,7 @@ async def register_user(user: UserCreate):
 
 
 @user_router.delete(
-    "/{user_id}", response_model=UserSchema, status_code=status.HTTP_200_OK
+    "/{user_id}", response_model=UserDeleteDTO, status_code=status.HTTP_200_OK
 )
 async def delete_user(user_id: int):
     is_deleted = soft_delete_user(user_id)
@@ -49,7 +49,7 @@ async def delete_user(user_id: int):
 
 
 @user_router.get(
-    "/{user_id}", response_model=UserSchema, status_code=status.HTTP_200_OK
+    "/{user_id}", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
 )
 async def get_user(user_id: int):
     user = get_user_by_id(user_id)
@@ -64,7 +64,7 @@ async def get_user(user_id: int):
 
 
 @user_router.delete(
-    "/{user_id}/hard", response_model=UserSchema, status_code=status.HTTP_200_OK
+    "/{user_id}/hard", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
 )
 async def delete_user_hard(user_id: int):
     success = hard_delete_user(user_id)
