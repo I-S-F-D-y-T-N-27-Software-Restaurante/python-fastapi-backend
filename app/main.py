@@ -41,15 +41,15 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
-if __name__ == "__main__":
-    try:
-        uvicorn.run(
-            "app.main:app",
-            host=HOST,
-            port=PORT,
-            reload=True,
-        )
-    except OSError as e:
-        logger.critical("OS error while starting server: %s", e, exc_info=True)
-    except KeyboardInterrupt:
-        logger.info("Server stopped by user")
+# if __name__ == "__main__":
+#     try:
+#         uvicorn.run(
+#             "app.main:app",
+#             host=HOST,
+#             port=PORT,
+#             reload=True,
+#         )
+#     except OSError as e:
+#         logger.critical("OS error while starting server: %s", e, exc_info=True)
+#     except KeyboardInterrupt:
+#         logger.info("Server stopped by user")
