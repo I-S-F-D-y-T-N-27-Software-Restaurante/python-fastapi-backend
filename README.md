@@ -2,7 +2,7 @@
 
 Proyect Python version 3.13.6
 
-## Activate the environment
+## First: Activate the environment
 
 ## With MAKE
 
