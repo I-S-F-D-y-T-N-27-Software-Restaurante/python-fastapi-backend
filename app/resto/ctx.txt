@@ -1,0 +1,6 @@
+
+GET /api/resto/mesas/{user_id}/table lista todas las mesas.
+GET /api/resto/{user_id}/table/{id} devuelve una mesa por id.
+POST /api/resto/{user_id}/table crea una nueva mesa.
+PUT /api/resto/{user_id}/table/{id} actualiza ocupación, notas o estado de la mesa.
+DELETE /api/resto/{user_id}/table/{id} elimina una mesa.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -60,3 +61,73 @@ class CookBaseDTO(BaseModel):
     class Config:
         from_attributes = True
         json_schema_extra = {"example": {"id": 3, "user_id": 10}}
+
+
+class RestorantTableDTO(BaseModel):
+    id: int
+    number: int
+    waiter_id: int
+    order_status_id: int
+    occupied: bool = False
+    notes: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    deleted_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "number": 12,
+                "waiter_id": 5,
+                "order_status_id": 2,
+                "occupied": True,
+                "notes": "VIP customer table near the window",
+                "created_at": "2025-09-29T12:30:00Z",
+                "updated_at": "2025-09-29T13:00:00Z",
+                "deleted_at": None,
+            }
+        }
+
+
+class RestoranTableCreateDTO(BaseModel):
+    number: int
+    waiter_id: int
+    order_status_id: int
+    occupied: bool = False
+    notes: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "number": 12,
+                "waiter_id": 5,
+                "order_status_id": 2,
+                "occupied": True,
+                "notes": "VIP customer table near the window",
+            }
+        }
+
+
+class UpdateRestorantTableDTO(BaseModel):
+    number: Optional[int] = None
+    waiter_id: Optional[int] = None
+    order_status_id: Optional[int] = None
+    occupied: Optional[bool] = None
+    notes: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "number": 15,
+                "waiter_id": 3,
+                "order_status_id": 4,
+                "occupied": False,
+                "notes": "Change location to window",
+                "deleted_at": None,
+            }
+        }
