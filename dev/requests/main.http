@@ -1,3 +1,0 @@
-@host = http://localhost:8000
-
-GET {{host}}/api/health HTTP/1.1

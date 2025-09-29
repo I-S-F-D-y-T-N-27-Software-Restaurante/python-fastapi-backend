@@ -4,6 +4,22 @@ Proyect Python version 3.13.6
 
 ## First: Activate the environment
 
+## With MAKE
+
+First execute to list available commands:
+
+```sh
+make help
+```
+
+After python vevn link and .env file setup:
+
+```sh
+make run
+```
+
+## Manually
+
 ### Linux/macOS
 
 ```sh
@@ -24,9 +40,31 @@ source.venv/bin/activate
 .venv\Scripts\activate.bat
 ```
 
-## Second: copy env.example and rename to .env
+## Install requirements
 
-## Third (optional proyect formater): Ruff formater install
+### Linux/macOS
+
+```sh
+pip install -r requirements.txt
+```
+
+## Windows
+
+```ps
+pip install -r requirements-windows.txt
+```
+
+## IMPORTANT: Env setup
+
+User MUST copy .env.example and rename it to .env without deleting original .env.example file. Otherwise proyect wont start.
+
+## Running the proyect
+
+```sh
+python -m app.main
+```
+
+## Optional proyect formater: Ruff formater install
 
 [Link to package at pypi repository.](https://pypi.org/project/ruff/)
 
@@ -68,15 +106,6 @@ Shows migration timeline.
  alembic history
 ```
 
+## Test Requests with REST Client extension
 
-### Install requirements
-
-## Linux/macOS:
-
-pip install -r requirements.txt
-
-## Windows
-
-pip install -r requirements-windows.txt
-
-
+On dev/request/main.http you will find a file with request that can be tested and previewed live with one click using the REST VSCode extension recommended in .vscode workspace recomendations: humao.rest-client

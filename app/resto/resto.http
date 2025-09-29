@@ -1,0 +1,11 @@
+@port = 8000
+@host = http://localhost:{{port}}
+@resto = /api/resto
+
+### Get all employees
+GET {{host}}{{resto}} HTTP/1.1
+
+### Make user employee role
+@user_var = 1
+@role_var = waiter
+POST {{host}}{{resto}}/roles/{{user_var}}/{{role_var}} HTTP/1.1
