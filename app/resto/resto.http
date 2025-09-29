@@ -39,6 +39,6 @@ Content-Type: application/json
     "number": 15,
     "waiter_id": 1,
     "order_status_id": 4,
-    "occupied": False,
-    "notes": "Change location to window",
+    "occupied": false,
+    "notes": "Change location to window"
 }

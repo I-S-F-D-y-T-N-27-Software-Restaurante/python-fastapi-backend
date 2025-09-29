@@ -122,12 +122,10 @@ class UpdateRestorantTableDTO(BaseModel):
         from_attributes = True
         json_schema_extra = {
             "example": {
-                "id": 1,
                 "number": 15,
                 "waiter_id": 3,
                 "order_status_id": 4,
                 "occupied": False,
                 "notes": "Change location to window",
-                "deleted_at": None,
             }
         }
