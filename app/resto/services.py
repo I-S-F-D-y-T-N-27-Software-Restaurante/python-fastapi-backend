@@ -243,20 +243,3 @@ def soft_delete_table(table_id: int):
             exc_info=True,
         )
         raise
-
-
-# def update_restorant_table(table_id: int, table: UpdateRestorantTableDTO):
-#     with SessionLocal() as db:
-#         table = db.get(RestorantTable, table_id)
-#         if not table:
-#             raise HTTPException(status_code=404, detail="Table not found")
-
-#         update_data = table.dict(exclude_unset=True)
-#         update_data.pop("id", None)  # prevent id updates
-
-#         for key, value in update_data.items():
-#             setattr(table, key, value)
-
-#         db.commit()
-#         db.refresh(table)
-#         return table

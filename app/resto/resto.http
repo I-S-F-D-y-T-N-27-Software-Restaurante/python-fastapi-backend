@@ -30,15 +30,3 @@ Content-Type: application/json
     "order_status_id": 1
 }
 
-### Update restorant table
-
-PATCH {{host}}{{resto}}/tables/{{table_number}} HTTP/1.1
-Content-Type: application/json
-
-{
-    "number": 15,
-    "waiter_id": 1,
-    "order_status_id": 4,
-    "occupied": false,
-    "notes": "Change location to window"
-}

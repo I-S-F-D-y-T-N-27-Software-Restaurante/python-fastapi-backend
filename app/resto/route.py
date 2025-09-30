@@ -84,11 +84,3 @@ async def create_table_with_user_id(table: RestoranTableCreateDTO):
 )
 async def delete_table(table_id: int):
     return soft_delete_table(table_id)
-
-# @resto_router.patch(
-#     "/tables/{table_id}",
-#     response_model=UpdateRestorantTableDTO,
-#     status_code=status.HTTP_200_OK,
-# )
-# async def modify_table_info(table_id: int, table: UpdateRestorantTableDTO):
-#     return update_restorant_table(table_id, table)
