@@ -2,6 +2,7 @@ import logging
 
 import uvicorn
 from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -14,6 +15,14 @@ logger = logging.getLogger(__name__)
 
 def create_app() -> FastAPI:
     server = FastAPI(title="Restorant Backend API")
+
+    server.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     server.include_router(api_router, prefix="/api")
 
     @server.get("/favicon.ico")
