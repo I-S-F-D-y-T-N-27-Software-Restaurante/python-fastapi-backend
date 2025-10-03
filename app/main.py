@@ -7,13 +7,11 @@ from fastapi.responses import JSONResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import HOST, PORT
-from app.default.routes import api_router 
+from app.default.routes import api_router
 from app.middlewares.auth import AuthMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
 
 
 def create_app() -> FastAPI:
@@ -32,8 +30,6 @@ def create_app() -> FastAPI:
     @server.get("/favicon.ico")
     async def favicon():
         return Response(status_code=204)
-    
-    
 
     @server.exception_handler(SQLAlchemyError)
     async def sqlalchemy_exception_handler(_request: Request, exc: SQLAlchemyError):
