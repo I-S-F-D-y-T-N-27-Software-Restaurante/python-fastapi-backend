@@ -2,9 +2,11 @@ import logging
 from datetime import datetime, timezone
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import selectinload
 
 from app.config.cnx import SessionLocal
 from app.config.sql_models import User
+from app.config.types import UserProfileEnum
 from app.middlewares.auth import compare_password, create_access_token, hash_password
 from app.user.dto import UserCreateDTO, UserUpdateDTO
 
@@ -36,7 +38,6 @@ def get_all_users():
 
 def create_user(user_data: UserCreateDTO):
     """Crea y retorna el registro de usuario si se ejecuta de manera exitosa."""
-
     hashed = hash_password(user_data.password)
 
     new_user = User(
@@ -86,7 +87,7 @@ def update_user(user_id: str, user_data: UserUpdateDTO):
 
             # Actualizar campos si se proporcionan
             if user_data.name:
-                user.firstName = user_data.firstName.strip()
+                user.name = user_data.name.strip()
             if user_data.email:
                 # Validar que el nuevo email no exista en otro usuario
                 existing_user = (
@@ -190,13 +191,23 @@ def authenticate_user(email: str, password: str):
 
             logger.info(f"DEBUG here: {password}")
 
+            # user = (
+            #     db.query(User)
+            #     .filter(User.email == email.strip().lower(), User.deleted_at.is_(None))
+            #     .first()
+            # )
+
+            # TODO -> if this works replace test with resto service get_employee_by_id
             user = (
                 db.query(User)
-                .filter(User.email == email.strip().lower(), User.deleted_at.is_(None))
+                .options(
+                    selectinload(User.waiter_profile),
+                    selectinload(User.cook_profile),
+                    selectinload(User.cashier_profile),
+                )
+                .filter(User.deleted_at.is_(None))
                 .first()
             )
-
-            logger.info(f"DEBUG here: {user.email}")
 
             if not user or not compare_password(password, user.password):
                 logger.warning(f"Intento de autenticación fallido para email: {email}")
@@ -266,11 +277,17 @@ def login_user(email: str, password: str):
     if not user:
         raise ValueError("Credenciales inválidas")
 
+    roles = []
+
+    if user.cashier_profile:
+        roles.append(UserProfileEnum.CASHIER)
+    if user.cook_profile:
+        roles.append(UserProfileEnum.COOK)
+    if user.waiter_profile:
+        roles.append(UserProfileEnum.WAITER)
+
     # Generar token
-    token_data = {
-        "sub": user.email,
-        "user_id": str(user.id),
-    }
+    token_data = {"sub": user.email, "user_id": str(user.id), "roles": roles}
 
     access_token = create_access_token(data=token_data)
 

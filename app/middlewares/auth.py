@@ -6,7 +6,8 @@ from typing import Optional
 import bcrypt
 import jwt
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
@@ -158,5 +159,48 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "user_id": user_id,
         "sub": email,
         "roles": payload.get("roles", []),
-        "permissions": payload.get("permissions", []),
     }
+
+def custom_openapi(app: FastAPI):
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="Restaurant System API",
+        version="1.0",
+        description="API REST con autenticación JWT",
+        routes=app.routes,
+    )
+
+    # Configurar el esquema de seguridad personalizado para JWT Bearer
+    openapi_schema["components"]["securitySchemes"] = {
+        "HTTPBearer": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Ingresa tu token JWT obtenido del endpoint /users/login",
+        }
+    }
+
+    # Agregar seguridad a todas las rutas excepto las públicas
+    if "paths" in openapi_schema:
+        for path, methods in openapi_schema["paths"].items():
+            for method, details in methods.items():
+                # Verificar si la ruta es pública
+                is_public = False
+
+                # Verificar rutas completamente públicas
+                if path in PUBLIC_ROUTES:
+                    is_public = True
+
+                # Verificar métodos específicos públicos
+                if path in PUBLIC_METHODS and method.lower() in PUBLIC_METHODS[path]:
+                    is_public = True
+
+                # Si no es pública, agregar seguridad
+                if not is_public:
+                    if "security" not in details:
+                        details["security"] = [{"HTTPBearer": []}]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema

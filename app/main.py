@@ -6,9 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.config import HOST, PORT
+from app.config import ENV, HOST, PORT
+from app.data.seed import seed
 from app.default.routes import api_router
-from app.middlewares.auth import AuthMiddleware
+from app.middlewares.auth import AuthMiddleware, custom_openapi
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ def create_app() -> FastAPI:
     )
 
     server.add_middleware(AuthMiddleware)
+
     server.include_router(api_router, prefix="/api")
 
     @server.get("/favicon.ico")
@@ -46,6 +48,14 @@ def create_app() -> FastAPI:
             status_code=500,
             content={"detail": "Internal server error"},
         )
+
+    def custom_openapi_handler():
+        return custom_openapi(app)
+
+    server.openapi = custom_openapi_handler  # type: ignore
+
+    if ENV == "DEV":
+        seed()
 
     return server
 

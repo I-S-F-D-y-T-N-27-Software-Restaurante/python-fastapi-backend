@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.config.cnx import SessionLocal
 from app.config.sql_models import Cashier, Cook, RestorantTable, User, Waiter
 from app.config.types import UserProfileEnum
-from app.resto.dto import RestoranTableCreateDTO, UpdateRestorantTableDTO
+from app.resto.dto import RestoranTableCreateDTO
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,6 @@ def make_user_role(user: User, role: UserProfileEnum):
     Retorna la version actualizada con el perfil de usuario completado.
     """
     with SessionLocal() as db:
-        # TODO -> implement return message instead of user
         try:
             if role == UserProfileEnum.WAITER:
                 if user.waiter_profile is not None:
@@ -238,7 +237,7 @@ def soft_delete_table(table_id: int):
     except SQLAlchemyError as e:
         logger.error(
             "Database error while soft-deleting table %s: %s",
-            table.id,
+            table_id,
             e,
             exc_info=True,
         )

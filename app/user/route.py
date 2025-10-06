@@ -7,6 +7,8 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.middlewares.auth import get_current_user
 from app.middlewares.security import get_current_user_token
+from app.resto.dto import UserBaseWithRestoProfilesDTO
+from app.resto.services import get_employee_by_id
 from app.user.dto import (
     TokenDTO,
     UserBaseDTO,
@@ -84,12 +86,15 @@ async def delete_user(user_id: int):
     return is_deleted
 
 
-@user_router.get("/me", response_model=UserBaseDTO, status_code=status.HTTP_200_OK)
+@user_router.get(
+    "/me", response_model=UserBaseWithRestoProfilesDTO, status_code=status.HTTP_200_OK
+)
 def get_current_user_profile(current_user: dict = Depends(get_current_user_token)):
     """Obtener perfil del usuario actual"""
     try:
         user_id = current_user["user_id"]
-        user = get_user_by_id(user_id)
+        # user = get_user_by_id(user_id)
+        user = get_employee_by_id(user_id)
 
         if not user:
             raise HTTPException(
