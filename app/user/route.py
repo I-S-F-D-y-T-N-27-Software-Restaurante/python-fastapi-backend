@@ -2,7 +2,7 @@ import logging
 import time
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config.types import Roles
@@ -198,10 +198,24 @@ def restore_user_endpoint(
 
 
 @user_router.post("/login", response_model=TokenDTO, status_code=status.HTTP_200_OK)
-def login_endpoint(login_data: UserLoginDTO):
+def login_endpoint(response: Response, login_data: UserLoginDTO):
     """Login de usuario - SIN middleware (acceso público)"""
     try:
-        return login_user(login_data.email, login_data.password)
+        token_data = login_user(login_data.email, login_data.password)
+
+        response.set_cookie(
+            key="token",
+            value=token_data["access_token"],
+            httponly=True,
+            secure=False,
+            path="/",
+            samesite="lax",
+            max_age=3600,
+            domain="localhost",
+        )
+
+        return token_data
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -213,3 +227,15 @@ def login_endpoint(login_data: UserLoginDTO):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error inesperado al iniciar sesión",
         ) from e
+
+
+@user_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout_user(response: Response):
+    return response.delete_cookie(
+        key="token",
+        path="/",
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        domain="localhost",
+    )

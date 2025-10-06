@@ -12,5 +12,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT") or 8080)
 DEBUG = int(os.getenv("DEBUG") or 0)
 ENV = os.getenv("ENV")
+ORIGINS = os.getenv("ALLOWED_ORIGINS")
+
 
 SQLALCHEMY_DATABSE_URI = STRCNX

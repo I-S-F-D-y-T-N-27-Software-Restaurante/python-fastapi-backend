@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.config import HOST, PORT
+from app.config import HOST, ORIGINS, PORT
 from app.default.routes import api_router
 from app.middlewares.auth import AuthMiddleware, custom_openapi
 
@@ -19,7 +19,9 @@ def create_app() -> FastAPI:
 
     server.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=ORIGINS,
+        allow_credentials=True,
+        # allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
     )

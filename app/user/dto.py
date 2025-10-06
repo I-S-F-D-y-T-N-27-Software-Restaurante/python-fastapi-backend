@@ -93,6 +93,7 @@ class TokenDTO(BaseModel):
     token_type: str
     user_id: str
     user_email: str
+    roles: list[str]
 
     class Config:
         json_schema_extra = {
@@ -101,5 +102,6 @@ class TokenDTO(BaseModel):
                 "token_type": "bearer",
                 "user_id": "fb2e3fd3-12f2-4173-b9a2-ec57e4d39c36",
                 "user_email": "alice@example.com",
+                "roles": ["admin", "waiter"],
             }
         }

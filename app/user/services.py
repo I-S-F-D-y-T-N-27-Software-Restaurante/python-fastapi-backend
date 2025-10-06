@@ -311,4 +311,5 @@ def login_user(email: str, password: str):
         "token_type": "bearer",
         "user_id": str(user.id),
         "user_email": user.email,
+        "roles": roles,
     }
