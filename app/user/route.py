@@ -59,8 +59,15 @@ async def list_users():
     return get_all_users()
 
 
-@user_router.post("/", response_model=UserBaseDTO, status_code=status.HTTP_200_OK)
-async def register_user(user: UserCreateDTO):
+@user_router.post(
+    "/",
+    response_model=UserBaseDTO,
+    status_code=status.HTTP_200_OK,
+)
+async def register_user(
+    user: UserCreateDTO,
+    _=Depends(role_required(Roles.ADMIN)),
+):
     is_registered = get_user_by_email(user.email)
 
     if is_registered is not None:
@@ -75,7 +82,7 @@ async def register_user(user: UserCreateDTO):
 @user_router.delete(
     "/{user_id}", response_model=UserDeleteDTO, status_code=status.HTTP_200_OK
 )
-async def delete_user(user_id: int):
+async def delete_user(user_id: int, _=Depends(role_required(Roles.ADMIN))):
     is_deleted = soft_delete_user(user_id)
 
     if not is_deleted:
@@ -138,7 +145,7 @@ async def get_user(user_id: int):
 @user_router.delete(
     "/{user_id}/hard", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
 )
-async def delete_user_hard(user_id: int, _d=Depends(role_required(Roles.ADMIN))):
+async def delete_user_hard(user_id: int, _=Depends(role_required(Roles.ADMIN))):
     success = hard_delete_user(user_id)
 
     if not success:
@@ -154,7 +161,11 @@ async def delete_user_hard(user_id: int, _d=Depends(role_required(Roles.ADMIN)))
     "/{user_id}/restore", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
 )
 def restore_user_endpoint(
-    user_id: str, log_info: dict = Depends(log_sensitive_operation)
+    user_id: str,
+    log_info: dict = Depends(
+        log_sensitive_operation,
+    ),
+    _=Depends(role_required(Roles.ADMIN)),
 ):
     """Restaurar un usuario eliminado - CON middleware de operación sensible"""
     try:

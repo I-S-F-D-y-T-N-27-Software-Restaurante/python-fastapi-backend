@@ -1,8 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 
 from app.config.types import Roles
+from app.middlewares.security import role_required
 from app.resto.dto import (
     RestoranTableCreateDTO,
     RestorantTableDTO,
@@ -26,7 +27,9 @@ resto_router = APIRouter(prefix="/resto")
     response_model=List[UserBaseWithRestoProfilesDTO],
     status_code=status.HTTP_200_OK,
 )
-async def list_users():
+async def list_users(
+    _=Depends(role_required(Roles.ADMIN)),
+):
     return get_all_employees()
 
 
@@ -35,7 +38,11 @@ async def list_users():
     response_model=UserBaseWithRestoProfilesDTO,
     status_code=status.HTTP_200_OK,
 )
-async def make_user_profile(user_id: int, role: Roles):
+async def make_user_profile(
+    user_id: int,
+    role: Roles,
+    _=Depends(role_required(Roles.ADMIN)),
+):
     user = get_employee_by_id(user_id)
     return make_user_role(user, role)
 
@@ -45,7 +52,10 @@ async def make_user_profile(user_id: int, role: Roles):
     response_model=UserBaseWithRestoProfilesDTO,
     status_code=status.HTTP_200_OK,
 )
-async def get_single_user_with_profile(user_id: int):
+async def get_single_user_with_profile(
+    user_id: int,
+    _=Depends(role_required(Roles.ADMIN)),
+):
     return get_employee_by_id(user_id)
 
 
@@ -54,7 +64,9 @@ async def get_single_user_with_profile(user_id: int):
     response_model=List[RestorantTableDTO],
     status_code=status.HTTP_200_OK,
 )
-async def get_all_tables():
+async def get_all_tables(
+    _=Depends(role_required(Roles.WAITER)),
+):
     return list_all_tables()
 
 
@@ -63,7 +75,10 @@ async def get_all_tables():
     response_model=List[RestorantTableDTO],
     status_code=status.HTTP_200_OK,
 )
-async def get_table_by_user_id(user_id: int):
+async def get_table_by_user_id(
+    user_id: int,
+    _=Depends(role_required(Roles.WAITER)),
+):
     return tables_list_by_user(user_id)
 
 
@@ -72,7 +87,10 @@ async def get_table_by_user_id(user_id: int):
     response_model=RestorantTableDTO,
     status_code=status.HTTP_200_OK,
 )
-async def create_table_with_user_id(table: RestoranTableCreateDTO):
+async def create_table_with_user_id(
+    table: RestoranTableCreateDTO,
+    _=Depends(role_required(Roles.WAITER)),
+):
     return create_single_table(table)
 
 
@@ -81,5 +99,8 @@ async def create_table_with_user_id(table: RestoranTableCreateDTO):
     response_model=RestorantTableDTO,
     status_code=status.HTTP_200_OK,
 )
-async def delete_table(table_id: int):
+async def delete_table(
+    table_id: int,
+    _=Depends(role_required(Roles.WAITER)),
+):
     return soft_delete_table(table_id)
