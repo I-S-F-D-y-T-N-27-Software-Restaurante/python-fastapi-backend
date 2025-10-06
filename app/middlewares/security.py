@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.config.types import Roles
+
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="your secret key").encode("utf-8")
@@ -58,3 +60,19 @@ async def get_current_user_token(
             detail="Token inválido",
             headers={"WWW-Authenticate": "Bearer"},
         ) from err
+
+
+def role_required(role: str | Roles):
+    def dependency(token=Depends(get_current_user_token)):
+        user_roles = token["roles"]
+        if not user_roles:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="No roles in token"
+            )
+        if role not in user_roles and "admin" not in user_roles:  # admin override
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough privileges"
+            )
+        return token
+
+    return dependency

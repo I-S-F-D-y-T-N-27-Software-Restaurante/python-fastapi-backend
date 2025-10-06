@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config.cnx import SessionLocal
 from app.config.sql_models import User
-from app.config.types import UserProfileEnum
+from app.config.types import Roles
 from app.middlewares.auth import compare_password, create_access_token, hash_password
 from app.user.dto import UserCreateDTO, UserUpdateDTO
 
@@ -182,6 +182,20 @@ def hard_delete_user(user_id: int):
         raise
 
 
+def hard_wipe_users():
+    """Borra de manera PERMANENTE todos los registros de la tabla de usuarios (solo para seed)."""
+    try:
+        with SessionLocal() as db:
+            deleted = db.query(User).delete()
+            db.commit()
+            logger.info("Hard-wiped %s users from the database", deleted)
+            return deleted
+
+    except SQLAlchemyError as e:
+        logger.error("Database error while wiping users: %s", e, exc_info=True)
+        raise
+
+
 def authenticate_user(email: str, password: str):
     """Autenticar un usuario por email y contraseña"""
     try:
@@ -189,13 +203,7 @@ def authenticate_user(email: str, password: str):
             if not email or not password:
                 return None
 
-            logger.info(f"DEBUG here: {password}")
-
-            # user = (
-            #     db.query(User)
-            #     .filter(User.email == email.strip().lower(), User.deleted_at.is_(None))
-            #     .first()
-            # )
+            logger.info(f"DEBUG here: {password} {email}")
 
             # TODO -> if this works replace test with resto service get_employee_by_id
             user = (
@@ -280,11 +288,15 @@ def login_user(email: str, password: str):
     roles = []
 
     if user.cashier_profile:
-        roles.append(UserProfileEnum.CASHIER)
+        roles.append(Roles.CASHIER)
     if user.cook_profile:
-        roles.append(UserProfileEnum.COOK)
+        roles.append(Roles.COOK)
     if user.waiter_profile:
-        roles.append(UserProfileEnum.WAITER)
+        roles.append(Roles.WAITER)
+
+    # assign admin privileges to single user for mock pourposes
+    if user.email == "evan@test.com":
+        roles.append("admin")  # type: ignore
 
     # Generar token
     token_data = {"sub": user.email, "user_id": str(user.id), "roles": roles}

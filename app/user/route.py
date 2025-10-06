@@ -5,8 +5,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.config.types import Roles
 from app.middlewares.auth import get_current_user
-from app.middlewares.security import get_current_user_token
+from app.middlewares.security import get_current_user_token, role_required
 from app.resto.dto import UserBaseWithRestoProfilesDTO
 from app.resto.services import get_employee_by_id
 from app.user.dto import (
@@ -138,7 +139,7 @@ async def get_user(user_id: int):
 @user_router.delete(
     "/{user_id}/hard", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
 )
-async def delete_user_hard(user_id: int):
+async def delete_user_hard(user_id: int, _d=Depends(role_required(Roles.ADMIN))):
     success = hard_delete_user(user_id)
 
     if not success:
@@ -190,9 +191,7 @@ def restore_user_endpoint(
 def login_endpoint(login_data: UserLoginDTO):
     """Login de usuario - SIN middleware (acceso público)"""
     try:
-        return login_user(
-            login_data.email, login_data.password
-        )  # Cambiado de emails a email
+        return login_user(login_data.email, login_data.password)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

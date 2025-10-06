@@ -10,7 +10,7 @@ STRCNX = os.getenv("STRCNX")
 ENGINE = os.getenv("ENGINE")
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT") or 8080)
+DEBUG = int(os.getenv("DEBUG") or 0)
 ENV = os.getenv("ENV")
-
 
 SQLALCHEMY_DATABSE_URI = STRCNX

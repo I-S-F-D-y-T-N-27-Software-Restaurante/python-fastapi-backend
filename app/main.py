@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
     server.openapi = custom_openapi_handler  # type: ignore
 
     if ENV == "DEV":
-        seed()
+        seed(True)
 
     return server
 

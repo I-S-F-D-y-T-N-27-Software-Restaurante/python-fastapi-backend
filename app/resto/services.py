@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config.cnx import SessionLocal
 from app.config.sql_models import Cashier, Cook, RestorantTable, User, Waiter
-from app.config.types import UserProfileEnum
+from app.config.types import Roles
 from app.resto.dto import RestoranTableCreateDTO
 
 logger = logging.getLogger(__name__)
@@ -77,14 +77,14 @@ def get_employee_by_email(email: str):
         )
 
 
-def make_user_role(user: User, role: UserProfileEnum):
+def make_user_role(user: User, role: Roles):
     """
     Asigna un perfil de empleado a un usuario.
     Retorna la version actualizada con el perfil de usuario completado.
     """
     with SessionLocal() as db:
         try:
-            if role == UserProfileEnum.WAITER:
+            if role == Roles.WAITER:
                 if user.waiter_profile is not None:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,7 +102,7 @@ def make_user_role(user: User, role: UserProfileEnum):
                 )
                 return user
 
-            if role == UserProfileEnum.COOK:
+            if role == Roles.COOK:
                 if user.cook_profile is not None:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -120,7 +120,7 @@ def make_user_role(user: User, role: UserProfileEnum):
                 )
                 return user
 
-            if role == UserProfileEnum.CASHIER:
+            if role == Roles.CASHIER:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Usuario {user.id} ya tiene perfil de cajero",

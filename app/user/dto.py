@@ -79,12 +79,12 @@ class UserDeleteDTO(BaseModel):
 
 
 class UserLoginDTO(BaseModel):
-    email: str  # Cambiado de 'emails'
+    email: str
     password: str
 
     class Config:
         json_schema_extra = {
-            "example": {"email": "alice@example.com", "password": "1234"}
+            "example": {"email": "alice@example.com", "password": "pass123"}
         }
 
 
@@ -100,6 +100,6 @@ class TokenDTO(BaseModel):
                 "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                 "token_type": "bearer",
                 "user_id": "fb2e3fd3-12f2-4173-b9a2-ec57e4d39c36",
-                "user_email": "admin@sistema.com",
+                "user_email": "alice@test.com",
             }
         }

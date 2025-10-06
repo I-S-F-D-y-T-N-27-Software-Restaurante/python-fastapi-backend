@@ -1,10 +1,13 @@
-from app.config.types import UserProfileEnum
+from app.config.types import Roles
 from app.resto.services import get_employee_by_email, make_user_role
 from app.user.dto import UserCreateDTO
-from app.user.services import create_user
+from app.user.services import create_user, hard_wipe_users
 
 
-def seed():
+def seed(should_wipe: bool):
+    if should_wipe:
+        hard_wipe_users()
+
     seed_users = [
         {"name": "Alice", "email": "alice@test.com", "password": "pass123"},
         {"name": "Bob", "email": "bob@test.com", "password": "pass123"},
@@ -24,13 +27,14 @@ def seed():
         charlie = get_employee_by_email(seed_users[2]["email"])
         diana = get_employee_by_email(seed_users[3]["email"])
 
-        make_user_role(alice, role=UserProfileEnum.WAITER)
-        make_user_role(bob, role=UserProfileEnum.WAITER)
+        make_user_role(alice, role=Roles.WAITER)
+        make_user_role(bob, role=Roles.WAITER)
 
-        make_user_role(alice, role=UserProfileEnum.COOK)
-        make_user_role(charlie, role=UserProfileEnum.COOK)
+        make_user_role(alice, role=Roles.COOK)
+        make_user_role(charlie, role=Roles.COOK)
 
-        make_user_role(alice, role=UserProfileEnum.CASHIER)
-        make_user_role(diana, role=UserProfileEnum.CASHIER)
+        make_user_role(alice, role=Roles.CASHIER)
+        make_user_role(diana, role=Roles.CASHIER)
+
     except Exception:
-        print("Ignoring error during role assignment")
+        print("Ignoring error during seed role assignment")
