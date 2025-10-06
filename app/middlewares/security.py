@@ -69,6 +69,7 @@ def role_required(role: str | Roles):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="No roles in token"
             )
+        print(user_roles)
         if role not in user_roles and "admin" not in user_roles:  # admin override
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Not enough privileges"

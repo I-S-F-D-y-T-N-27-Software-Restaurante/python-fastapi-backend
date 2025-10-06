@@ -9,11 +9,11 @@ def seed(should_wipe: bool):
         hard_wipe_users()
 
     seed_users = [
-        {"name": "Alice", "email": "alice@test.com", "password": "pass123"},
-        {"name": "Bob", "email": "bob@test.com", "password": "pass123"},
-        {"name": "Charlie", "email": "charlie@test.com", "password": "pass123"},
-        {"name": "Diana", "email": "diana@test.com", "password": "pass123"},
-        {"name": "Evan", "email": "evan@test.com", "password": "pass123"},
+        {"name": "Alice", "email": "alice@example.com", "password": "pass123"},
+        {"name": "Bob", "email": "bob@example.com", "password": "pass123"},
+        {"name": "Charlie", "email": "charlie@example.com", "password": "pass123"},
+        {"name": "Diana", "email": "diana@example.com", "password": "pass123"},
+        {"name": "Evan", "email": "evan@example.com", "password": "pass123"},
     ]
 
     for user_data in seed_users:
@@ -38,3 +38,7 @@ def seed(should_wipe: bool):
 
     except Exception:
         print("Ignoring error during seed role assignment")
+
+
+if __name__ == "__main__":
+    seed(True)

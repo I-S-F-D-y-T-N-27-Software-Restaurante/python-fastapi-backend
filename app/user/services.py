@@ -205,7 +205,6 @@ def authenticate_user(email: str, password: str):
 
             logger.info(f"DEBUG here: {password} {email}")
 
-            # TODO -> if this works replace test with resto service get_employee_by_id
             user = (
                 db.query(User)
                 .options(
@@ -213,7 +212,7 @@ def authenticate_user(email: str, password: str):
                     selectinload(User.cook_profile),
                     selectinload(User.cashier_profile),
                 )
-                .filter(User.deleted_at.is_(None))
+                .filter(User.email == email, User.deleted_at.is_(None))
                 .first()
             )
 
@@ -295,8 +294,10 @@ def login_user(email: str, password: str):
         roles.append(Roles.WAITER)
 
     # assign admin privileges to single user for mock pourposes
-    if user.email == "evan@test.com":
+    if user.email == "evan@example.com":
         roles.append("admin")  # type: ignore
+        # TODO -> remove this
+        logger.info(roles)
 
     # Generar token
     token_data = {"sub": user.email, "user_id": str(user.id), "roles": roles}
