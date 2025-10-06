@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -6,11 +7,11 @@ from pydantic import BaseModel, EmailStr
 class UserBaseDTO(BaseModel):
     id: int
     name: str
-    email: EmailStr
+    email: EmailStr  # Cambiado de 'emails' a 'email'
 
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime | None = None
+    deleted_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -29,7 +30,7 @@ class UserBaseDTO(BaseModel):
 
 class UserCreateDTO(BaseModel):
     name: str
-    email: EmailStr
+    email: EmailStr  # Cambiado de 'emails'
     password: str
 
     class Config:
@@ -45,9 +46,9 @@ class UserCreateDTO(BaseModel):
 
 
 class UserUpdateDTO(BaseModel):
-    name: str | None = None
-    email: EmailStr | None = None
-    password: str | None = None
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None  # Cambiado
+    password: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -73,5 +74,32 @@ class UserDeleteDTO(BaseModel):
                 "name": "Alice Johnson",
                 "email": "alice@example.com",
                 "deleted_at": "2025-09-24T12:00:00Z",
+            }
+        }
+
+
+class UserLoginDTO(BaseModel):
+    email: str
+    password: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {"email": "alice@example.com", "password": "pass123"}
+        }
+
+
+class TokenDTO(BaseModel):
+    access_token: str
+    token_type: str
+    user_id: str
+    user_email: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "token_type": "bearer",
+                "user_id": "fb2e3fd3-12f2-4173-b9a2-ec57e4d39c36",
+                "user_email": "alice@example.com",
             }
         }

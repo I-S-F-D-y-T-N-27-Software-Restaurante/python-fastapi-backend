@@ -19,14 +19,19 @@ class User(Base):
     waiter_profile: Mapped["Waiter"] = relationship(
         "Waiter",
         back_populates="user",
+        cascade="all, delete-orphan",
         uselist=False,
     )
     cook_profile: Mapped["Cook"] = relationship(
-        "Cook", back_populates="user", uselist=False
+        "Cook",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
     cashier_profile: Mapped["Cashier"] = relationship(
         "Cashier",
         back_populates="user",
+        cascade="all, delete-orphan",
         uselist=False,
     )
 

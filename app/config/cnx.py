@@ -1,11 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.config import STRCNX
+from app.config import DEBUG, STRCNX
 
 if STRCNX is None:
     raise ValueError("Database connection is not configured.")
 
-engine = create_engine(STRCNX, echo=True)
+is_verbose = DEBUG == 1
+engine = create_engine(STRCNX, echo=is_verbose)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=True)

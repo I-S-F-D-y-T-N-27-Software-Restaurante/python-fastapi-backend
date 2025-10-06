@@ -1,7 +1,8 @@
 from enum import Enum
 
 
-class UserProfileEnum(str, Enum):
+class Roles(str, Enum):
     WAITER = "waiter"
     COOK = "cook"
     CASHIER = "cashier"
+    ADMIN = "admin"

@@ -2,11 +2,10 @@ from typing import List
 
 from fastapi import APIRouter, status
 
-from app.config.types import UserProfileEnum
+from app.config.types import Roles
 from app.resto.dto import (
     RestoranTableCreateDTO,
     RestorantTableDTO,
-    UpdateRestorantTableDTO,
     UserBaseWithRestoProfilesDTO,
 )
 from app.resto.services import (
@@ -36,7 +35,7 @@ async def list_users():
     response_model=UserBaseWithRestoProfilesDTO,
     status_code=status.HTTP_200_OK,
 )
-async def make_user_profile(user_id: str, role: UserProfileEnum):
+async def make_user_profile(user_id: int, role: Roles):
     user = get_employee_by_id(user_id)
     return make_user_role(user, role)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -17,7 +17,7 @@ class UserBaseWithRestoProfilesDTO(BaseModel):
 
     created_at: datetime
     updated_at: datetime
-    deleted_at: datetime | None = None
+    # deleted_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -61,7 +61,6 @@ class CookBaseDTO(BaseModel):
     class Config:
         from_attributes = True
         json_schema_extra = {"example": {"id": 3, "user_id": 10}}
-
 
 class RestorantTableDTO(BaseModel):
     id: int

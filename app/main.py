@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import HOST, PORT
 from app.default.routes import api_router
+from app.middlewares.auth import AuthMiddleware, custom_openapi
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,6 +23,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    server.add_middleware(AuthMiddleware)
 
     server.include_router(api_router, prefix="/api")
 
@@ -45,6 +48,10 @@ def create_app() -> FastAPI:
             content={"detail": "Internal server error"},
         )
 
+    def custom_openapi_handler():
+        return custom_openapi(app)
+
+    server.openapi = custom_openapi_handler  # type: ignore
     return server
 
 
