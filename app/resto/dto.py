@@ -62,6 +62,7 @@ class CookBaseDTO(BaseModel):
         from_attributes = True
         json_schema_extra = {"example": {"id": 3, "user_id": 10}}
 
+
 class RestorantTableDTO(BaseModel):
     id: int
     number: int

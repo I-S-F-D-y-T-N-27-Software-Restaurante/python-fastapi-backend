@@ -105,3 +105,18 @@ class TokenDTO(BaseModel):
                 "roles": ["admin", "waiter"],
             }
         }
+
+
+class UserTokenDataDTO(BaseModel):
+    user_id: str
+    user_email: str
+    roles: list[str]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "fb2e3fd3-12f2-4173-b9a2-ec57e4d39c36",
+                "user_email": "alice@example.com",
+                "roles": ["admin", "waiter"],
+            }
+        }

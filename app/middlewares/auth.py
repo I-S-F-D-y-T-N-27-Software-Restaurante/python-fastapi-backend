@@ -37,9 +37,7 @@ PUBLIC_METHODS = {
 }
 
 # Rutas que requieren autenticación pero no verificación de permisos
-AUTHENTICATED_ONLY_ROUTES = [
-    "/api/users/me",
-]
+AUTHENTICATED_ONLY_ROUTES: list[str] = []
 
 
 def hash_password(password: str) -> str:
@@ -149,10 +147,15 @@ async def verify_token(token: str = Depends(oauth2_scheme)):
         ) from err
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
+    # Skip auth for preflight requests
+    if request.method == "OPTIONS":
+        return None
+
     payload = await verify_token(token)
     user_id = payload.get("user_id")
     email = payload.get("sub")
+
     if not user_id or not email:
         raise HTTPException(status_code=401, detail="Token inválido: datos faltantes")
     return {
@@ -160,6 +163,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "sub": email,
         "roles": payload.get("roles", []),
     }
+
 
 def custom_openapi(app: FastAPI):
     if app.openapi_schema:

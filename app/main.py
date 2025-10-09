@@ -17,12 +17,14 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     server = FastAPI(title="Restorant Backend API")
 
+    logger.info(ORIGINS)
+
     server.add_middleware(
         CORSMiddleware,
         allow_origins=ORIGINS,
         allow_credentials=True,
-        # allow_origins=["*"],
         allow_methods=["*"],
+        # allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
 

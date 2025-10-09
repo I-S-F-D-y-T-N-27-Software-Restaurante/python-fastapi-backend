@@ -13,6 +13,6 @@ PORT = int(os.getenv("PORT") or 8080)
 DEBUG = int(os.getenv("DEBUG") or 0)
 ENV = os.getenv("ENV")
 ORIGINS = os.getenv("ALLOWED_ORIGINS")
-
+SECRET_KEY = os.getenv("SECRET_KEY", default="1234").encode("utf-8")
 
 SQLALCHEMY_DATABSE_URI = STRCNX
