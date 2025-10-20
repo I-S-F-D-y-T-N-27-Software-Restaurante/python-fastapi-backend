@@ -8,6 +8,8 @@ from app.resto.dto import (
     RestoranTableCreateDTO,
     RestorantTableDTO,
     UserBaseWithRestoProfilesDTO,
+    OrderCreateDTO,
+    OrderDTO,
 )
 from app.resto.services import (
     create_single_table,
@@ -17,6 +19,11 @@ from app.resto.services import (
     make_user_role,
     soft_delete_table,
     tables_list_by_user,
+    create_order,
+    get_order_by_id,
+    list_all_orders,
+    update_order_status,
+    soft_delete_order,
 )
 
 resto_router = APIRouter(prefix="/resto")
@@ -104,3 +111,82 @@ async def delete_table(
     _=Depends(role_required(Roles.WAITER)),
 ):
     return soft_delete_table(table_id)
+
+# ==============================
+#           ORDERS
+# ==============================
+
+@resto_router.post(
+    "/orders",
+    response_model=OrderDTO,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_new_order(
+    order: OrderCreateDTO,
+    _=Depends(role_required(Roles.WAITER)),
+):
+    """
+    Crea un nuevo pedido junto con sus ítems.
+    Solo accesible por mozos.
+    """
+    return create_order(order)
+
+
+@resto_router.get(
+    "/orders",
+    response_model=List[OrderDTO],
+    status_code=status.HTTP_200_OK,
+)
+async def get_all_orders(
+    _=Depends(role_required(Roles.WAITER)),
+):
+    """
+    Lista todos los pedidos activos con sus ítems.
+    """
+    return list_all_orders()
+
+
+@resto_router.get(
+    "/orders/{order_id}",
+    response_model=OrderDTO,
+    status_code=status.HTTP_200_OK,
+)
+async def get_single_order(
+    order_id: int,
+    _=Depends(role_required(Roles.WAITER)),
+):
+    """
+    Obtiene un pedido específico con sus ítems.
+    """
+    return get_order_by_id(order_id)
+
+
+@resto_router.patch(
+    "/orders/{order_id}/status/{status_id}",
+    response_model=OrderDTO,
+    status_code=status.HTTP_200_OK,
+)
+async def update_order_state(
+    order_id: int,
+    status_id: int,
+    _=Depends(role_required(Roles.WAITER)),
+):
+    """
+    Cambia el estado de un pedido existente.
+    """
+    return update_order_status(order_id, status_id)
+
+
+@resto_router.delete(
+    "/orders/{order_id}",
+    response_model=OrderDTO,
+    status_code=status.HTTP_200_OK,
+)
+async def delete_order_by_id(
+    order_id: int,
+    _=Depends(role_required(Roles.WAITER)),
+):
+    """
+    Realiza un borrado lógico del pedido.
+    """
+    return soft_delete_order(order_id)
