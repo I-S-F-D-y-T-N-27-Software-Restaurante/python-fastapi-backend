@@ -1,14 +1,15 @@
 import logging
 from datetime import datetime, timezone
+from decimal import Decimal
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 
 from app.config.cnx import SessionLocal
-from app.config.sql_models import Cashier, Cook, RestorantTable, User, Waiter
+from app.config.sql_models import Cashier, Cook, RestorantTable, User, Waiter , Order, OrderItem, OrderStatus
 from app.config.types import Roles
-from app.resto.dto import RestoranTableCreateDTO
+from app.resto.dto import RestoranTableCreateDTO , OrderCreateDTO
 
 logger = logging.getLogger(__name__)
 
@@ -242,3 +243,132 @@ def soft_delete_table(table_id: int):
             exc_info=True,
         )
         raise
+
+def create_order(order_data: OrderCreateDTO):
+    """
+    Crea un nuevo pedido junto con sus items.
+    """
+    try:
+        with SessionLocal() as db:
+            # Validar mesa y mozo existentes
+            table = db.get(RestorantTable, order_data.table_id)
+            waiter = db.get(Waiter, order_data.waiter_id)
+            status = db.get(OrderStatus, order_data.status_id)
+
+            if not table or table.deleted_at:
+                raise HTTPException(status_code=400, detail="Table not found or deleted.")
+            if not waiter or waiter.deleted_at:
+                raise HTTPException(status_code=400, detail="Waiter not found or deleted.")
+            if not status:
+                raise HTTPException(status_code=400, detail="Invalid order status.")
+
+            # Crear el pedido principal
+            new_order = Order(
+                table_id=order_data.table_id,
+                waiter_id=order_data.waiter_id,
+                status_id=order_data.status_id,
+                total=Decimal(order_data.total),
+                notes=order_data.notes,
+            )
+            db.add(new_order)
+            db.flush()  # para obtener el ID antes de crear los ítems
+
+            # Crear los items asociados
+            for item in order_data.items:
+                order_item = OrderItem(
+                    order_id=new_order.id,
+                    menu_item_id=item.menu_item_id,
+                    quantity=item.quantity,
+                    unit_price=item.unit_price,
+                    notes=item.notes,
+                )
+                db.add(order_item)
+
+            db.commit()
+            db.refresh(new_order)
+
+            logger.info("Order created successfully with id %s", new_order.id)
+            return new_order
+
+    except SQLAlchemyError as e:
+        logger.error("Error creating order: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error while creating order.")
+
+def get_order_by_id(order_id: int):
+    """
+    Retorna un pedido por ID, incluyendo sus ítems.
+    """
+    with SessionLocal() as db:
+        order = (
+            db.query(Order)
+            .options(selectinload(Order.items))
+            .filter(Order.id == order_id, Order.deleted_at.is_(None))
+            .first()
+        )
+
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found.")
+
+        return order
+
+def list_all_orders():
+    """
+    Retorna todos los pedidos activos con sus ítems.
+    """
+    with SessionLocal() as db:
+        orders = (
+            db.query(Order)
+            .options(selectinload(Order.items))
+            .filter(Order.deleted_at.is_(None))
+            .all()
+        )
+        return orders
+
+def update_order_status(order_id: int, new_status_id: int):
+    """
+    Cambia el estado de un pedido.
+    """
+    try:
+        with SessionLocal() as db:
+            order = db.get(Order, order_id)
+            if not order or order.deleted_at:
+                raise HTTPException(status_code=404, detail="Order not found.")
+
+            status = db.get(OrderStatus, new_status_id)
+            if not status:
+                raise HTTPException(status_code=400, detail="Invalid status ID.")
+
+            order.status_id = new_status_id
+            order.updated_at = datetime.now(timezone.utc)
+            db.commit()
+            db.refresh(order)
+
+            logger.info(
+                "Order %s updated to status %s", order_id, new_status_id
+            )
+            return order
+
+    except SQLAlchemyError as e:
+        logger.error("Error updating order status: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error while updating order.")
+
+def soft_delete_order(order_id: int):
+    """
+    Marca un pedido como eliminado (soft delete).
+    """
+    try:
+        with SessionLocal() as db:
+            order = db.get(Order, order_id)
+            if not order or order.deleted_at:
+                raise HTTPException(status_code=404, detail="Order not found.")
+
+            order.deleted_at = datetime.now(timezone.utc)
+            db.commit()
+            db.refresh(order)
+
+            logger.info("Order %s soft deleted", order_id)
+            return order
+
+    except SQLAlchemyError as e:
+        logger.error("Error soft deleting order: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error while deleting order.")
