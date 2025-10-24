@@ -37,7 +37,7 @@ source.venv/bin/activate
 ### Windows cmd
 
 ```cmd
-.venv\Scripts\activate.bat
+venv\Scripts\activate
 ```
 
 ## Install requirements
