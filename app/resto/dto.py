@@ -64,16 +64,7 @@ class CookBaseDTO(BaseModel):
         json_schema_extra = {"example": {"id": 3, "user_id": 10}}
 
 
-class RestorantTableDTO(BaseModel):
-    id: int
-    number: int
-    waiter_id: int
-    order_status_id: int
-    occupied: bool = False
-    notes: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
-    deleted_at: Optional[datetime] = None
+
 
     class Config:
         from_attributes = True
@@ -92,12 +83,6 @@ class RestorantTableDTO(BaseModel):
         }
 
 
-class RestoranTableCreateDTO(BaseModel):
-    number: int
-    waiter_id: int
-    order_status_id: int
-    occupied: bool = False
-    notes: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -112,12 +97,7 @@ class RestoranTableCreateDTO(BaseModel):
         }
 
 
-class UpdateRestorantTableDTO(BaseModel):
-    number: Optional[int] = None
-    waiter_id: Optional[int] = None
-    order_status_id: Optional[int] = None
-    occupied: Optional[bool] = None
-    notes: Optional[str] = None
+
 
     class Config:
         from_attributes = True
