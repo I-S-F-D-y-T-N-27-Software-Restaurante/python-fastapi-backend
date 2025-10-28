@@ -1,7 +1,7 @@
 from app.config.types import Roles
-from app.resto.services import get_employee_by_email, make_user_role
+from app.resto.services import make_user_role
 from app.user.dto import UserCreateDTO
-from app.user.services import create_user, hard_wipe_users
+from app.user.services import create_user, get_user_by_email, hard_wipe_users
 
 
 def seed(should_wipe: bool):
@@ -17,27 +17,34 @@ def seed(should_wipe: bool):
     ]
 
     for user_data in seed_users:
-        if not get_employee_by_email(user_data["email"]):
+        if not get_user_by_email(user_data["email"]):
             user_dto = UserCreateDTO(**user_data)
             create_user(user_dto)
 
     try:
-        alice = get_employee_by_email(seed_users[0]["email"])
-        bob = get_employee_by_email(seed_users[1]["email"])
-        charlie = get_employee_by_email(seed_users[2]["email"])
-        diana = get_employee_by_email(seed_users[3]["email"])
+        alice = get_user_by_email("alice@example.com")
+        bob = get_user_by_email("bob@example.com")
+        charlie = get_user_by_email("charlie@example.com")
+        diana = get_user_by_email("diana@example.com")
 
-        make_user_role(alice, role=Roles.WAITER)
-        make_user_role(bob, role=Roles.WAITER)
+        if alice:
+            make_user_role(alice, role=Roles.CASHIER)
+            make_user_role(alice, role=Roles.WAITER)
+            make_user_role(alice, role=Roles.COOK)
 
-        make_user_role(alice, role=Roles.COOK)
-        make_user_role(charlie, role=Roles.COOK)
+        if bob:
+            make_user_role(bob, role=Roles.WAITER)
 
-        make_user_role(alice, role=Roles.CASHIER)
-        make_user_role(diana, role=Roles.CASHIER)
+        if charlie:
+            make_user_role(charlie, role=Roles.COOK)
 
-    except Exception:
-        print("Ignoring error during seed role assignment")
+        if diana:
+            make_user_role(diana, role=Roles.CASHIER)
+
+        
+
+    except Exception as e:
+        print("Error during seed: ", e)
 
 
 if __name__ == "__main__":

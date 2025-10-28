@@ -1,25 +1,22 @@
 import logging
-from datetime import datetime, timezone
-from decimal import Decimal
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 
 from app.config.cnx import SessionLocal
-from app.config.sql_models import Cashier, Cook, User, Waiter, Order, OrderItem, OrderStatus, RestorantTable
+from app.config.sql_models import Cashier, Cook, User, Waiter
 from app.config.types import Roles
-from app.resto.dto import OrderCreateDTO
 
 logger = logging.getLogger(__name__)
+
 logging.basicConfig(level=logging.INFO)
 
-# ===================================================
-#               EMPLEADOS
-# ===================================================
 
 def get_all_employees():
-    """Busca y retorna todos los usuarios con perfiles de cocina activos."""
+    """
+    Busca y retorna todos los usuarios con perfiles de cocina activos.
+    """
     with SessionLocal() as db:
         users = (
             db.query(User)
@@ -35,7 +32,11 @@ def get_all_employees():
 
 
 def get_employee_by_id(user_id: int):
-    """Obtiene un empleado por su ID."""
+    """
+    Ejecuta una busqueda para encontrar en la tabla usuarios un registro
+    que corresponda con el id y no este borrado de manera logica y retorna
+    Usuarios con los campos de empleado completados.
+    """
     with SessionLocal() as db:
         user = (
             db.query(User)
@@ -49,12 +50,18 @@ def get_employee_by_id(user_id: int):
         )
 
         if user is None:
-            raise HTTPException(status_code=400, detail="Employee not found.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Employee not found.",
+            )
+
         return user
 
 
 def get_employee_by_email(email: str):
-    """Busca y retorna un usuario por email."""
+    """
+    Busca y retorna el primer registro que coincida con el campo email.
+    """
     with SessionLocal() as db:
         return (
             db.query(User)
@@ -69,125 +76,75 @@ def get_employee_by_email(email: str):
 
 
 def make_user_role(user: User, role: Roles):
-    """Asigna un rol a un usuario (waiter, cook o cashier)."""
+    """
+    Asigna perfiles de empleado a un usuario.
+    Puede asignar múltiples roles en un solo llamado.
+    Retorna la versión actualizada del usuario con los perfiles cargados.
+    """
     with SessionLocal() as db:
         try:
+            # Merge detached user into current session
+            user = db.merge(user)
+
             if role == Roles.WAITER:
-                if user.waiter_profile is not None:
-                    raise HTTPException(status_code=400, detail="Usuario ya es mesero.")
-                db.add(Waiter(user=user))
+                if user.waiter_profile:
+                    logger.warning(
+                        f"Usuario {user.id} ya tiene perfil de mesero, se salta"
+                    )
+
+                waiter = Waiter(user=user)
+                db.add(waiter)
+                db.commit()
+                db.refresh(user)
+                logger.info(
+                    "Usuario convertido a rol mesero correctamente: User id %s, Waiter id %s",
+                    user.id,
+                    waiter.id,
+                )
 
             elif role == Roles.COOK:
-                if user.cook_profile is not None:
-                    raise HTTPException(status_code=400, detail="Usuario ya es cocinero.")
-                db.add(Cook(user=user))
+                if user.cook_profile:
+                    logger.warning(
+                        f"Usuario {user.id} ya tiene perfil de cocina, se salta"
+                    )
+
+                cook = Cook(user=user)
+                db.add(cook)
+                db.commit()
+                db.refresh(user)
+                logger.info(
+                    "Usuario convertido a rol cocina correctamente: User id %s, Cook id %s",
+                    user.id,
+                    cook.id,
+                )
 
             elif role == Roles.CASHIER:
-                if user.cashier_profile is not None:
-                    raise HTTPException(status_code=400, detail="Usuario ya es cajero.")
-                db.add(Cashier(user=user))
+                if user.cashier_profile:
+                    logger.warning(
+                        f"Usuario {user.id} ya tiene perfil de cajero, se salta"
+                    )
 
-            db.commit()
-            db.refresh(user)
+                cashier = Cashier(user=user)
+                db.add(cashier)
+                db.commit()
+                db.refresh(user)
+                logger.info(
+                    "Usuario convertido a rol cajero correctamente: User id %s, Cashier id %s",
+                    user.id,
+                    cashier.id,
+                )
+
+            else:
+                logger.warning(f"Rol no reconocido: {role}, se ignora")
+
             return user
 
         except SQLAlchemyError as e:
             db.rollback()
-            logger.error("Error al crear perfil: %s", e, exc_info=True)
-            raise
-
-
-# ===================================================
-#               PEDIDOS
-# ===================================================
-
-def create_order(order_data: OrderCreateDTO):
-    """Crea un nuevo pedido y sus items."""
-    with SessionLocal() as db:
-        try:
-            new_order = Order(
-                table_id=order_data.table_id,
-                waiter_id=order_data.waiter_id,
-                status_id=order_data.status_id or 1,  # Estado inicial
-                total_amount=Decimal("0.00"),
-                created_at=datetime.now(timezone.utc),
+            logger.error(
+                "Error al crear perfil actual para el usuario: User id %s: %s",
+                user.id,
+                e,
+                exc_info=True,
             )
-
-            db.add(new_order)
-            db.flush()  # Genera el ID del pedido antes de crear items
-
-            total = Decimal("0.00")
-            for item in order_data.items:
-                order_item = OrderItem(
-                    order_id=new_order.id,
-                    product_id=item.product_id,
-                    quantity=item.quantity,
-                    price=item.price,
-                )
-                db.add(order_item)
-                total += item.price * item.quantity
-
-            new_order.total_amount = total
-            db.commit()
-            db.refresh(new_order)
-            return new_order
-
-        except SQLAlchemyError as e:
-            db.rollback()
-            logger.error("Error al crear pedido: %s", e, exc_info=True)
-            raise HTTPException(status_code=500, detail="Error al crear el pedido.")
-
-
-def get_order_by_id(order_id: int):
-    """Obtiene un pedido por su ID."""
-    with SessionLocal() as db:
-        order = (
-            db.query(Order)
-            .options(selectinload(Order.items))
-            .filter(Order.id == order_id, Order.deleted_at.is_(None))
-            .first()
-        )
-        if not order:
-            raise HTTPException(status_code=404, detail="Pedido no encontrado.")
-        return order
-
-
-def list_all_orders():
-    """Lista todos los pedidos activos."""
-    with SessionLocal() as db:
-        orders = (
-            db.query(Order)
-            .options(selectinload(Order.items))
-            .filter(Order.deleted_at.is_(None))
-            .all()
-        )
-        return orders
-
-
-def update_order_status(order_id: int, status_id: int):
-    """Actualiza el estado de un pedido."""
-    with SessionLocal() as db:
-        order = db.query(Order).filter(Order.id == order_id, Order.deleted_at.is_(None)).first()
-        if not order:
-            raise HTTPException(status_code=404, detail="Pedido no encontrado.")
-
-        status_obj = db.query(OrderStatus).filter(OrderStatus.id == status_id).first()
-        if not status_obj:
-            raise HTTPException(status_code=400, detail="Estado inválido.")
-
-        order.status_id = status_id
-        db.commit()
-        db.refresh(order)
-        return order
-
-
-def soft_delete_order(order_id: int):
-    """Elimina lógicamente un pedido."""
-    with SessionLocal() as db:
-        order = db.query(Order).filter(Order.id == order_id, Order.deleted_at.is_(None)).first()
-        if not order:
-            raise HTTPException(status_code=404, detail="Pedido no encontrado.")
-
-        order.deleted_at = datetime.now(timezone.utc)
-        db.commit()
-        return order
+            raise

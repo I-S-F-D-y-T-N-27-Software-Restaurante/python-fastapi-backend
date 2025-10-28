@@ -140,7 +140,9 @@ def update_user(user_id: str, user_data: UserUpdateDTO):
 
 
 def soft_delete_user(user_id: int):
-    """Borra de manera logica el registro de un usuario activo."""
+    """
+    Marca un usuario como eliminado sin borrarlo físicamente de la base de datos.
+    """
     try:
         with SessionLocal() as db:
             user = db.get(User, user_id)
@@ -296,8 +298,6 @@ def login_user(email: str, password: str):
     # assign admin privileges to single user for mock pourposes
     if user.email == "evan@example.com":
         roles.append("admin")  # type: ignore
-        # TODO -> remove this
-        logger.info(roles)
 
     # Generar token
     token_data = {"sub": user.email, "user_id": str(user.id), "roles": roles}

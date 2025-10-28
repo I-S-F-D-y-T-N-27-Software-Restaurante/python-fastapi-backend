@@ -1,8 +1,8 @@
-"""init
+"""try
 
-Revision ID: 6318e7648588
+Revision ID: b2ac251370c5
 Revises: 
-Create Date: 2025-09-24 11:41:09.999357
+Create Date: 2025-10-27 11:33:41.077862
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6318e7648588'
+revision: str = 'b2ac251370c5'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,15 +32,6 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('order_statuses',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
     )
     op.create_table('payment_methods',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -71,20 +62,23 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('cooks',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('waiters',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('id')
+    sa.UniqueConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('audits',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -102,15 +96,12 @@ def upgrade() -> None:
     )
     op.create_table('tables',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('number', sa.Integer(), nullable=False),
     sa.Column('waiter_id', sa.Integer(), nullable=False),
-    sa.Column('order_status_id', sa.Integer(), nullable=False),
-    sa.Column('occupied', sa.Boolean(), nullable=False),
+    sa.Column('status', sa.Enum('AVAILABLE', 'OCCUPIED', 'RESERVED', 'CLEANING', 'MAINTENANCE', name='restaurant_table_status_enum'), nullable=False),
     sa.Column('notes', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['order_status_id'], ['order_statuses.id'], ),
     sa.ForeignKeyConstraint(['waiter_id'], ['waiters.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -118,13 +109,12 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('table_id', sa.Integer(), nullable=False),
     sa.Column('waiter_id', sa.Integer(), nullable=False),
-    sa.Column('status_id', sa.Integer(), nullable=False),
     sa.Column('total', sa.DECIMAL(), nullable=False),
     sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('status', sa.Enum('UNASSIGNED', 'PENDING', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELED', name='order_status_enum'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['status_id'], ['order_statuses.id'], ),
     sa.ForeignKeyConstraint(['table_id'], ['tables.id'], ),
     sa.ForeignKeyConstraint(['waiter_id'], ['waiters.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -178,15 +168,14 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('order_item_id', sa.Integer(), nullable=False),
     sa.Column('cook_id', sa.Integer(), nullable=False),
-    sa.Column('status_id', sa.Integer(), nullable=False),
     sa.Column('cancelled', sa.Boolean(), nullable=False),
     sa.Column('cancellation_reason', sa.Text(), nullable=True),
+    sa.Column('status', sa.Enum('UNASSIGNED', 'PENDING', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELED', name='order_status_enum'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['cook_id'], ['cooks.id'], ),
     sa.ForeignKeyConstraint(['order_item_id'], ['order_items.id'], ),
-    sa.ForeignKeyConstraint(['status_id'], ['order_statuses.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -208,6 +197,5 @@ def downgrade() -> None:
     op.drop_table('admins')
     op.drop_table('users')
     op.drop_table('payment_methods')
-    op.drop_table('order_statuses')
     op.drop_table('menu_items')
     # ### end Alembic commands ###

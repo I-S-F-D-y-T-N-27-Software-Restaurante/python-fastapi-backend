@@ -1,81 +1,70 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from typing import List
 
-from app.config.cnx import get_db
+from fastapi import APIRouter, Depends, status
+
 from app.config.types import Roles
-from app.middlewares.security import get_current_user_token, role_required
-from app.tables.dto import TableCreateDTO, TableUpdateDTO, TableResponseDTO
+from app.middlewares.security import role_required
+from app.tables.dto import RestoranTableCreateDTO, RestorantTableDTO
 from app.tables.services import (
-    get_tables,
-    get_table_by_id,
-    get_tables_by_waiter,
-    create_table,
-    update_table,
-    soft_delete_table
+    create_single_table,
+    list_all_tables,
+    soft_delete_table,
+    tables_list_by_user,
 )
 
 tables_router = APIRouter(prefix="/tables", tags=["Tables"])
 
 
-
-@tables_router.get("/", response_model=List[TableResponseDTO])
-def list_tables(
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user_token)  # todos los usuarios autenticados pueden listar
+@tables_router.get(
+    "/",
+    response_model=List[RestorantTableDTO],
+    status_code=status.HTTP_200_OK,
+    summary="Get all available tables.",
+    description="This should return all tables that are not soft deleted.",
+)
+async def get_all_tables(
+    _=Depends(role_required(Roles.WAITER)),
 ):
-    """Lista todas las mesas activas."""
-    return get_tables(db)
+    return list_all_tables()
 
 
-@tables_router.get("/by_waiter/{waiter_id}", response_model=List[TableResponseDTO])
-def list_tables_by_waiter(
-    waiter_id: int,
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user_token)  # todos los usuarios autenticados
+@tables_router.get(
+    "/{user_id}",
+    response_model=List[RestorantTableDTO],
+    status_code=status.HTTP_200_OK,
+    summary="Get table assigned to an User by ID",
+    description="This should bring tables only assigned to the User in question.",
+)
+async def get_table_by_user_id(
+    user_id: int,
+    _=Depends(role_required(Roles.WAITER)),
 ):
-    """Obtiene las mesas asignadas a un mozo."""
-    return get_tables_by_waiter(db, waiter_id)
-
-
-@tables_router.get("/{table_id}", response_model=TableResponseDTO)
-def get_table(
-    table_id: int,
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user_token)  # todos los usuarios autenticados
-):
-    """Obtiene una mesa específica por ID."""
-    return get_table_by_id(db, table_id)
+    return tables_list_by_user(user_id)
 
 
 @tables_router.post(
-    "/", response_model=TableResponseDTO, status_code=201
+    "/",
+    response_model=RestorantTableDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Creates a restorant table.",
+    description="Creates a single restorant table, for usage in tables managment.",
 )
-def create_new_table(
-    data: TableCreateDTO,
-    db: Session = Depends(get_db),
-    token=Depends(role_required(Roles.WAITER))  # WAITER o ADMIN
+async def create_table_with_user_id(
+    table: RestoranTableCreateDTO,
+    _=Depends(role_required(Roles.WAITER)),
 ):
-    """Crea una nueva mesa."""
-    return create_table(db, data)
+    return create_single_table(table)
 
 
-@tables_router.put("/{table_id}", response_model=TableResponseDTO)
-def modify_table(
+@tables_router.delete(
+    "/{table_id}",
+    response_model=RestorantTableDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Deletes a restorant table.",
+    description="Soft deletes a restorant tabled by table id.",
+)
+async def delete_table(
     table_id: int,
-    data: TableUpdateDTO,
-    db: Session = Depends(get_db),
-    token=Depends(role_required(Roles.WAITER))  # WAITER o ADMIN
+    _=Depends(role_required(Roles.WAITER)),
 ):
-    """Actualiza una mesa existente."""
-    return update_table(db, table_id, data)
-
-
-@tables_router.delete("/{table_id}")
-def remove_table(
-    table_id: int,
-    db: Session = Depends(get_db),
-    token=Depends(role_required(Roles.WAITER))  # WAITER o ADMIN
-):
-    """Borrado lógico de una mesa."""
-    return soft_delete_table(db, table_id)
+    return soft_delete_table(table_id)

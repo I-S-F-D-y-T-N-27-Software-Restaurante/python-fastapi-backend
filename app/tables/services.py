@@ -1,65 +1,108 @@
-from datetime import datetime
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
+import logging
+from datetime import datetime, timezone
+
+from fastapi import HTTPException, status
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.config.cnx import SessionLocal
 from app.config.sql_models import RestorantTable
-from app.tables.dto import TableCreateDTO, TableUpdateDTO
+from app.resto.services import get_employee_by_id
+from app.tables.dto import RestoranTableCreateDTO
+
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.INFO)
 
 
-def get_tables(db: Session):
-    """Obtiene todas las mesas activas (no eliminadas)."""
-    return db.query(RestorantTable).filter(RestorantTable.deleted_at == None).all()
+def list_all_tables():
+    """
+    Busca y retorna todas las mesas disponibles.
+    """
+    with SessionLocal() as db:
+        tables = (
+            db.query(RestorantTable).filter(RestorantTable.deleted_at.is_(None)).all()
+        )
+        return tables
 
 
-def get_table_by_id(db: Session, table_id: int):
-    """Obtiene una mesa específica por ID."""
-    table = db.query(RestorantTable).filter(
-        RestorantTable.id == table_id,
-        RestorantTable.deleted_at == None
-    ).first()
-    if not table:
-        raise HTTPException(status_code=404, detail="Mesa no encontrada")
-    return table
+def tables_list_by_user(user_id: int):
+    """Encuentra todas las tablas asignadas a un usuario."""
+    user = get_employee_by_id(user_id)
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Employee not found.",
+        )
+
+    with SessionLocal() as db:
+        return (
+            db.query(RestorantTable)
+            .filter(user.waiter_profile.user_id == user_id)
+            .all()
+        )
 
 
-def get_tables_by_waiter(db: Session, waiter_id: int):
-    """Obtiene todas las mesas asignadas a un mozo específico."""
-    tables = db.query(RestorantTable).filter(
-        RestorantTable.waiter_id == waiter_id,
-        RestorantTable.deleted_at == None
-    ).all()
-    return tables
+def find_table_by_id(table_id: int):
+    with SessionLocal() as db:
+        table = db.query(RestorantTable).filter(RestorantTable.id == table_id).all()
+
+        if table is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Table not found.",
+            )
+
+        return table
 
 
-def create_table(db: Session, data: TableCreateDTO):
-    """Crea una nueva mesa verificando que no exista otra con el mismo número."""
-    existing = db.query(RestorantTable).filter(
-        RestorantTable.number == data.number,
-        RestorantTable.deleted_at == None
-    ).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Ya existe una mesa con ese número")
+def create_single_table(table: RestoranTableCreateDTO):
+    new_table = RestorantTable(
+        waiter_id=table.waiter_id, notes=table.notes, status=table.status
+    )
+    try:
+        with SessionLocal() as db:
+            db.add(new_table)
+            db.commit()
+            db.refresh(new_table)
+            logger.info(
+                "Created new table with id %s and waiter.id %s",
+                new_table.id,
+                new_table.waiter.id,
+            )
+            return new_table
 
-    new_table = RestorantTable(**data.dict())
-    db.add(new_table)
-    db.commit()
-    db.refresh(new_table)
-    return new_table
+    except SQLAlchemyError as e:
+        logger.error(
+            "Database error while creating table %s: %s",
+            RestorantTable.id,
+            e,
+            exc_info=True,
+        )
+        raise
 
 
-def update_table(db: Session, table_id: int, data: TableUpdateDTO):
-    """Actualiza los datos de una mesa existente."""
-    table = get_table_by_id(db, table_id)
-    for key, value in data.dict(exclude_unset=True).items():
-        setattr(table, key, value)
-    db.commit()
-    db.refresh(table)
-    return table
+def soft_delete_table(table_id: int):
+    """Borra de manera logica la mesa con el id dado."""
+    try:
+        with SessionLocal() as db:
+            table = db.get(RestorantTable, table_id)
+            if not table:
+                raise HTTPException(status_code=404, detail="Table not found")
 
+            table.deleted_at = datetime.now(timezone.utc)
+            db.commit()
 
-def soft_delete_table(db: Session, table_id: int):
-    """Realiza un borrado lógico de la mesa."""
-    table = get_table_by_id(db, table_id)
-    table.deleted_at = datetime.utcnow()
-    db.commit()
-    db.refresh(table)
-    return {"message": f"Mesa {table_id} eliminada correctamente"}
+            db.refresh(table)
+
+            logger.info("Soft-deleted table with id %s", table.id)
+            return table
+
+    except SQLAlchemyError as e:
+        logger.error(
+            "Database error while soft-deleting table %s: %s",
+            table_id,
+            e,
+            exc_info=True,
+        )
+        raise

@@ -12,10 +12,12 @@ from fastapi.security import OAuth2PasswordBearer
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
+from app.config import ENV
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-SECRET_KEY = os.getenv("SECRET_KEY", "your secret key").encode("utf-8")
+SECRET_KEY = os.getenv("SECRET_KEY", "1234").encode("utf-8")
 
 # Rutas públicas (no requieren token)
 PUBLIC_ROUTES = [
@@ -33,6 +35,7 @@ PUBLIC_ROUTES = [
 PUBLIC_METHODS = {
     "/api/users": ["POST"],  # Registro público
     "/api/users/login": ["POST", "OPTIONS"],  # Login público
+    "/api/auth/login": ["POST", "OPTIONS"],  # Login público
     "/api/health": ["GET"],
 }
 
@@ -55,6 +58,10 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         if expires_delta
         else timedelta(minutes=float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")))
     )
+
+    if ENV == "DEV":
+        expire = datetime.now(timezone.utc) + timedelta(days=36500)  # 100 years
+
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=os.getenv("ALGORITHM", "HS256"))
 
@@ -79,27 +86,39 @@ class AuthMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         method = request.method
 
+        # Allow all OPTIONS requests (CORS preflight)
+        if method == "OPTIONS" or self.is_public_route(path, method):
+            return await call_next(request)
+
         if self.is_public_route(path, method):
             return await call_next(request)
 
-        authorization: Optional[str] = request.headers.get("Authorization")
+        authorization: Optional[str] = request.headers.get(
+            "Authorization"
+        ) or request.cookies.get("RESTOApiToken")
+
         if not authorization:
             return JSONResponse(
                 status_code=401, content={"detail": "Token de autorización requerido"}
             )
 
         try:
-            scheme, token = authorization.split()
-            if scheme.lower() != "bearer":
-                return JSONResponse(
-                    status_code=401,
-                    content={"detail": "Esquema inválido. Use 'Bearer <token>'"},
-                )
+            # Checks type of auth
+            if authorization.lower().startswith("bearer "):
+                scheme, token = authorization.split()
 
-            payload = verify_jwt_token(token)
-            request.state.user = payload
+                if scheme.lower() != "bearer":
+                    return JSONResponse(
+                        status_code=401,
+                        content={"detail": "Esquema inválido. Use 'Bearer <token>'"},
+                    )
 
-            # Aquí puedes agregar verificación de permisos si quieres
+                payload = verify_jwt_token(token)
+                request.state.user = payload
+            else:
+                payload = verify_jwt_token(authorization)
+                request.state.user = payload
+
         except ValueError:
             return JSONResponse(
                 status_code=401, content={"detail": "Formato de token inválido"}

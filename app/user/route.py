@@ -2,35 +2,26 @@ import logging
 import time
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config.types import Roles
 from app.middlewares.auth import get_current_user
-from app.middlewares.security import get_current_user_token, role_required
-from app.resto.services import get_employee_by_id
-from app.user.dto import (
-    TokenDTO,
-    UserBaseDTO,
-    UserCreateDTO,
-    UserDeleteDTO,
-    UserLoginDTO,
-    UserTokenDataDTO,
-)
+from app.middlewares.security import role_required
+from app.user.dto import UserBaseDTO, UserCreateDTO, UserDeleteDTO
 from app.user.services import (
     create_user,
     get_all_users,
     get_user_by_email,
     get_user_by_id,
     hard_delete_user,
-    login_user,
     restore_user,
     soft_delete_user,
 )
 
 logger = logging.getLogger(__name__)
 
-user_router = APIRouter(prefix="/users")
+user_router = APIRouter(prefix="/users", tags=["Users"])
 
 
 # Dependency personalizado para logging de operaciones sensibles
@@ -54,7 +45,13 @@ async def log_sensitive_operation(
     }
 
 
-@user_router.get("/", response_model=List[UserBaseDTO], status_code=status.HTTP_200_OK)
+@user_router.get(
+    "/",
+    response_model=List[UserBaseDTO],
+    status_code=status.HTTP_200_OK,
+    summary="List all users",
+    description="Retrieve a list of all users in the system",
+)
 async def list_users():
     return get_all_users()
 
@@ -63,6 +60,8 @@ async def list_users():
     "/",
     response_model=UserBaseDTO,
     status_code=status.HTTP_200_OK,
+    summary="Register a new user",
+    description="Create a new user account with the provided information",
 )
 async def register_user(
     user: UserCreateDTO,
@@ -80,7 +79,11 @@ async def register_user(
 
 
 @user_router.delete(
-    "/{user_id}", response_model=UserDeleteDTO, status_code=status.HTTP_200_OK
+    "/{user_id}",
+    response_model=UserDeleteDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Soft delete user",
+    description="Mark a user as deleted without removing from database",
 )
 async def delete_user(user_id: int, _=Depends(role_required(Roles.ADMIN))):
     is_deleted = soft_delete_user(user_id)
@@ -94,40 +97,12 @@ async def delete_user(user_id: int, _=Depends(role_required(Roles.ADMIN))):
     return is_deleted
 
 
-@user_router.get("/me", response_model=UserTokenDataDTO, status_code=status.HTTP_200_OK)
-def get_current_user_profile(current_user: dict = Depends(get_current_user_token)):
-    """Obtener perfil del usuario actual"""
-    try:
-        user_id = current_user["user_id"]
-        user = get_employee_by_id(user_id)
-
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado"
-            )
-
-        return current_user
-
-    except HTTPException:
-        raise
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
-        ) from error
-    except SQLAlchemyError as error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error interno del servidor al obtener el perfil",
-        ) from error
-    except Exception as error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error inesperado al obtener el perfil",
-        ) from error
-
-
 @user_router.get(
-    "/{user_id}", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
+    "/{user_id}",
+    response_model=UserBaseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Get user by ID",
+    description="Retrieve a single user by their unique ID",
 )
 async def get_user(user_id: int):
     user = get_user_by_id(user_id)
@@ -142,7 +117,11 @@ async def get_user(user_id: int):
 
 
 @user_router.delete(
-    "/{user_id}/hard", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
+    "/{user_id}/hard",
+    response_model=UserBaseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Hard delete user",
+    description="Permanently remove a user from the database",
 )
 async def delete_user_hard(user_id: int, _=Depends(role_required(Roles.ADMIN))):
     success = hard_delete_user(user_id)
@@ -157,7 +136,11 @@ async def delete_user_hard(user_id: int, _=Depends(role_required(Roles.ADMIN))):
 
 
 @user_router.post(
-    "/{user_id}/restore", response_model=UserBaseDTO, status_code=status.HTTP_200_OK
+    "/{user_id}/restore",
+    response_model=UserBaseDTO,
+    status_code=status.HTTP_200_OK,
+    summary="Restore deleted user",
+    description="Restore a previously soft-deleted user (requires admin privileges)",
 )
 def restore_user_endpoint(
     user_id: str,
@@ -194,47 +177,3 @@ def restore_user_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error inesperado al restaurar el usuario",
         ) from error
-
-
-@user_router.post("/login", response_model=TokenDTO, status_code=status.HTTP_200_OK)
-def login_endpoint(response: Response, login_data: UserLoginDTO):
-    """Login de usuario - SIN middleware (acceso público)"""
-    try:
-        token_data = login_user(login_data.email, login_data.password)
-
-        response.set_cookie(
-            key="token",
-            value=token_data["access_token"],
-            httponly=True,
-            secure=False,
-            path="/",
-            samesite="lax",
-            max_age=3600,
-            domain="localhost",
-        )
-
-        return token_data
-
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from e
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error inesperado al iniciar sesión",
-        ) from e
-
-
-@user_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout_user(response: Response):
-    return response.delete_cookie(
-        key="token",
-        path="/",
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        domain="localhost",
-    )

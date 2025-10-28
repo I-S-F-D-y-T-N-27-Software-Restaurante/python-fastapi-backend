@@ -2,6 +2,7 @@
 Security utilities for FastAPI with JWT authentication
 """
 
+import logging
 import os
 
 import jwt
@@ -13,6 +14,9 @@ from app.config import SECRET_KEY
 from app.config.types import Roles
 
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 security = HTTPBearer(auto_error=False)
@@ -26,12 +30,15 @@ def get_current_user_token(
     Get current user from JWT.
     Supports both Authorization header and HTTP-only cookie.
     """
+
     # Skip auth for preflight requests
     if request.method == "OPTIONS":
         return None
 
     # First try Bearer token
-    token = credentials.credentials if credentials else request.cookies.get("token")
+    token = (
+        credentials.credentials if credentials else request.cookies.get("RESTOApiToken")
+    )
 
     if not token:
         raise HTTPException(
@@ -49,17 +56,19 @@ def get_current_user_token(
         user_id = payload.get("user_id")
         email = payload.get("sub")
 
-        if user_id is None or email is None:
+        if not user_id or not email:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token invalid: missing user data",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
+        roles = payload.get("roles", [])
+
         return {
             "user_id": user_id,
             "user_email": email,
-            "roles": payload.get("roles", []),
+            "roles": roles,
         }
 
     except jwt.ExpiredSignatureError as err:
@@ -90,3 +99,4 @@ def role_required(role: str | Roles):
         return token
 
     return dependency
+
