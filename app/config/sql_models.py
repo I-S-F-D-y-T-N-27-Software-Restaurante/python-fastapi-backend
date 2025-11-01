@@ -266,33 +266,6 @@ class Order(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
-# class OrderStatus(Base):
-#     __tablename__ = "order_statuses"
-
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-#     name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-
-#     tables: Mapped[list["RestorantTable"]] = relationship(
-#         "RestorantTable", back_populates="order_status"
-#     )
-
-#     orders: Mapped[list["Order"]] = relationship("Order", back_populates="status")
-
-#     preparations: Mapped[list["Preparation"]] = relationship(
-#         "Preparation", back_populates="status"
-#     )
-
-#     created_at: Mapped[datetime] = mapped_column(
-#         DateTime, default=lambda: datetime.now(timezone.utc)
-#     )
-#     updated_at: Mapped[datetime] = mapped_column(
-#         DateTime,
-#         default=lambda: datetime.now(timezone.utc),
-#         onupdate=lambda: datetime.now(timezone.utc),
-#     )
-#     deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-
-
 class Preparation(Base):
     __tablename__ = "preparations"
 
@@ -300,7 +273,6 @@ class Preparation(Base):
 
     order_item_id: Mapped[int] = mapped_column(ForeignKey("order_items.id"))
     cook_id: Mapped[int] = mapped_column(ForeignKey("cooks.id"))
-    # status_id: Mapped[int] = mapped_column(ForeignKey("order_statuses.id"))
 
     cancelled: Mapped[bool] = mapped_column(Boolean, default=False)
     cancellation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -310,9 +282,6 @@ class Preparation(Base):
     )
 
     cook: Mapped["Cook"] = relationship("Cook", back_populates="preparations")
-    # status: Mapped["OrderStatus"] = relationship(
-    #     "OrderStatus", back_populates="preparations"
-    # )
 
     status: Mapped[OrderStatus] = mapped_column(
         SqlEnum(OrderStatus, name="order_status_enum"),
