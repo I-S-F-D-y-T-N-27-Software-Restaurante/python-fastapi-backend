@@ -8,6 +8,7 @@ from app.menu.services import (
     create_menu_entry,
     delete_menu_entry,
     get_all_menu_entries,
+    get_all_menu_entries_from_category,
     update_menu_entry,
 )
 from app.middlewares.security import role_required
@@ -75,3 +76,17 @@ async def update_menu_item(
         raise HTTPException(status_code=404, detail=str(e))
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@menu_router.get(
+    "/search/{filter_value}",
+    response_model=List[MenuItemDTO],
+    status_code=status.HTTP_200_OK,
+    summary="Get all menu items from category",
+    description="Get all menu items that are not soft deleted within the category",
+)
+async def list_menu_items_by_category(
+    filter_value: str,
+    _=Depends(role_required(Roles.WAITER)),
+):
+    return get_all_menu_entries_from_category(filter_value)

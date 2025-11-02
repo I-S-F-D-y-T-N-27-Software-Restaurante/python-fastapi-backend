@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.auth.route import auth_router
 from app.menu.route import menu_router
+from app.orders.route import orders_router
 from app.resto.route import resto_router
 from app.tables.route import tables_router
 from app.user.route import user_router
@@ -24,3 +25,4 @@ api_router.include_router(resto_router)
 api_router.include_router(tables_router)
 api_router.include_router(auth_router)
 api_router.include_router(menu_router)
+api_router.include_router(orders_router)

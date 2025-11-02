@@ -148,3 +148,4 @@ def make_user_role(user: User, role: Roles):
                 exc_info=True,
             )
             raise
+

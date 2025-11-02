@@ -103,3 +103,14 @@ def update_menu_entry(menu_id: int, update_data: UpdateMenuItemDTO) -> MenuItem:
             exc_info=True,
         )
         raise
+
+
+def get_all_menu_entries_from_category(filter_value: str):
+    """Busca y retorna todos las entradas de menu activas dentro de una categoria especifica."""
+    with SessionLocal() as db:
+        items = (
+            db.query(MenuItem)
+            .filter(MenuItem.deleted_at.is_(None), MenuItem.category == filter_value)
+            .all()
+        )
+        return items
