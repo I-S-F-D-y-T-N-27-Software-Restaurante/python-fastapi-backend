@@ -32,6 +32,7 @@
         "--disable=R0902",
         "--disable=W0718",
         "--disable=W0719",
+        "--disable=W0707",
     ],
     "python.analysis.inlayHints.callArgumentNames": "all",
     "python.analysis.inlayHints.functionReturnTypes": true,

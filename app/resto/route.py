@@ -1,6 +1,7 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.config.types import Roles
 from app.middlewares.security import role_required
@@ -27,16 +28,23 @@ async def list_users(
     "/roles/{user_id}/{role}",
     response_model=UserBaseWithRestoProfilesDTO,
     status_code=status.HTTP_200_OK,
-    summary="With and UserID converts that user into a employee of type",
-    description="Enpoint ment for an admin to assign a role to an user/employee.",
+    summary="Convert a user into an employee of a specific type",
+    description="Endpoint for an admin to assign a role to a user/employee.",
 )
 async def make_user_profile(
     user_id: int,
     role: Roles,
     _=Depends(role_required(Roles.ADMIN)),
 ):
-    user = get_employee_by_id(user_id)
-    return make_user_role(user, role)
+    try:
+        user = get_employee_by_id(user_id)
+        return make_user_role(user, role)
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Failed to assign role to user")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 @resto_router.get(
