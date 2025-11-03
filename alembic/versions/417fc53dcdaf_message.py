@@ -1,8 +1,8 @@
-"""try
+"""message
 
-Revision ID: b2ac251370c5
+Revision ID: 417fc53dcdaf
 Revises: 
-Create Date: 2025-10-27 11:33:41.077862
+Create Date: 2025-11-02 18:33:20.421837
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b2ac251370c5'
+revision: str = '417fc53dcdaf'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,12 +32,6 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('payment_methods',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -80,20 +74,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('id'),
     sa.UniqueConstraint('user_id')
     )
-    op.create_table('audits',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('admin_id', sa.Integer(), nullable=False),
-    sa.Column('action', sa.String(), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('date', sa.DateTime(), nullable=False),
-    sa.Column('affected_entity', sa.String(), nullable=True),
-    sa.Column('entity_id', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['admin_id'], ['admins.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('tables',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('waiter_id', sa.Integer(), nullable=False),
@@ -110,7 +90,6 @@ def upgrade() -> None:
     sa.Column('table_id', sa.Integer(), nullable=False),
     sa.Column('waiter_id', sa.Integer(), nullable=False),
     sa.Column('total', sa.DECIMAL(), nullable=False),
-    sa.Column('notes', sa.Text(), nullable=True),
     sa.Column('status', sa.Enum('UNASSIGNED', 'PENDING', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELED', name='order_status_enum'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
@@ -119,64 +98,12 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['waiter_id'], ['waiters.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('invoices',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('order_id', sa.Integer(), nullable=False),
-    sa.Column('issuer_id', sa.Integer(), nullable=False),
-    sa.Column('invoice_number', sa.String(), nullable=False),
-    sa.Column('issue_date', sa.DateTime(), nullable=False),
-    sa.Column('total_amount', sa.DECIMAL(), nullable=False),
-    sa.Column('details', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('order_items',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    op.create_table('order_menuitem_association',
     sa.Column('order_id', sa.Integer(), nullable=False),
     sa.Column('menu_item_id', sa.Integer(), nullable=False),
-    sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('unit_price', sa.DECIMAL(), nullable=False),
-    sa.Column('notes', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['menu_item_id'], ['menu_items.id'], ),
     sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('payments',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('order_id', sa.Integer(), nullable=False),
-    sa.Column('cashier_id', sa.Integer(), nullable=False),
-    sa.Column('method_id', sa.Integer(), nullable=False),
-    sa.Column('amount', sa.DECIMAL(), nullable=False),
-    sa.Column('payment_time', sa.DateTime(), nullable=False),
-    sa.Column('notes', sa.Text(), nullable=True),
-    sa.Column('discounts_applied', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['cashier_id'], ['cashiers.id'], ),
-    sa.ForeignKeyConstraint(['method_id'], ['payment_methods.id'], ),
-    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('preparations',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('order_item_id', sa.Integer(), nullable=False),
-    sa.Column('cook_id', sa.Integer(), nullable=False),
-    sa.Column('cancelled', sa.Boolean(), nullable=False),
-    sa.Column('cancellation_reason', sa.Text(), nullable=True),
-    sa.Column('status', sa.Enum('UNASSIGNED', 'PENDING', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELED', name='order_status_enum'), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.Column('deleted_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['cook_id'], ['cooks.id'], ),
-    sa.ForeignKeyConstraint(['order_item_id'], ['order_items.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('order_id', 'menu_item_id')
     )
     # ### end Alembic commands ###
 
@@ -184,18 +111,13 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('preparations')
-    op.drop_table('payments')
-    op.drop_table('order_items')
-    op.drop_table('invoices')
+    op.drop_table('order_menuitem_association')
     op.drop_table('orders')
     op.drop_table('tables')
-    op.drop_table('audits')
     op.drop_table('waiters')
     op.drop_table('cooks')
     op.drop_table('cashiers')
     op.drop_table('admins')
     op.drop_table('users')
-    op.drop_table('payment_methods')
     op.drop_table('menu_items')
     # ### end Alembic commands ###

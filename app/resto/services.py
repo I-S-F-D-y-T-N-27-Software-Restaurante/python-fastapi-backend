@@ -88,9 +88,7 @@ def make_user_role(user: User, role: Roles):
 
             if role == Roles.WAITER:
                 if user.waiter_profile:
-                    logger.warning(
-                        f"Usuario {user.id} ya tiene perfil de mesero, se salta"
-                    )
+                    raise ValueError(f"Usuario {user.id} ya tiene perfil de mesero")
 
                 waiter = Waiter(user=user)
                 db.add(waiter)
@@ -104,9 +102,7 @@ def make_user_role(user: User, role: Roles):
 
             elif role == Roles.COOK:
                 if user.cook_profile:
-                    logger.warning(
-                        f"Usuario {user.id} ya tiene perfil de cocina, se salta"
-                    )
+                    raise ValueError(f"Usuario {user.id} ya tiene perfil de cocina")
 
                 cook = Cook(user=user)
                 db.add(cook)
@@ -120,9 +116,7 @@ def make_user_role(user: User, role: Roles):
 
             elif role == Roles.CASHIER:
                 if user.cashier_profile:
-                    logger.warning(
-                        f"Usuario {user.id} ya tiene perfil de cajero, se salta"
-                    )
+                    raise ValueError(f"Usuario {user.id} ya tiene perfil de cajero")
 
                 cashier = Cashier(user=user)
                 db.add(cashier)
@@ -135,7 +129,7 @@ def make_user_role(user: User, role: Roles):
                 )
 
             else:
-                logger.warning(f"Rol no reconocido: {role}, se ignora")
+                raise ValueError(f"Rol no reconocido: {role}")
 
             return user
 
@@ -148,3 +142,4 @@ def make_user_role(user: User, role: Roles):
                 exc_info=True,
             )
             raise
+

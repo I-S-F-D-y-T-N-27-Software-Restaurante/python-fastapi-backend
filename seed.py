@@ -41,8 +41,6 @@ def seed(should_wipe: bool):
         if diana:
             make_user_role(diana, role=Roles.CASHIER)
 
-        
-
     except Exception as e:
         print("Error during seed: ", e)
 

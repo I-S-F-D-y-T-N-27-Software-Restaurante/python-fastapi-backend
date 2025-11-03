@@ -20,15 +20,23 @@ if config.config_file_name is not None:
 from app.config.basemodel import Base
 from app.config.sql_models import (
     Admin,
-    Audit,
     Cashier,
     Cook,
-    Invoice,
-    Payment,
-    PaymentMethod,
+    MenuItem,
+    Order,
+    RestorantTable,
     User,
     Waiter,
 )
+
+Admin
+Cashier
+Cook
+User
+Waiter
+RestorantTable
+Order
+MenuItem
 
 target_metadata = Base.metadata
 
