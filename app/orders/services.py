@@ -65,3 +65,31 @@ def get_orders_by_table_id(table_id: int):
             .filter(Order.table_id == table_id, Order.deleted_at.is_(None))
             .all()
         )
+
+def list_all_orders():
+    with SessionLocal() as db:
+        return (
+            db.query(Order)
+            .options(joinedload(Order.menu_items))
+            .filter(Order.deleted_at.is_(None))
+            .all()
+        )
+
+
+def update_order_status_for_table(order_id: int, new_status: str) -> Order:
+    try:
+        with SessionLocal() as db:
+            order = db.get(Order, order_id)
+            if not order:
+                raise ValueError(f"Order {order_id} not found")
+
+            order.status = OrderStatus(new_status)
+
+            db.add(order)
+            db.commit()
+            db.refresh(order)
+            return order
+
+    except SQLAlchemyError as e:
+        logger.error("Failed to update order status: %s", e, exc_info=True)
+        raise
