@@ -114,3 +114,66 @@ def get_all_menu_entries_from_category(filter_value: str):
             .all()
         )
         return items
+
+
+def create_menu_entries(menu_items: list[CreateMenuItemDTO]):
+    """
+    Crea múltiples entradas de menú según la lista proporcionada.
+    Cada item en la lista se guarda como una entrada separada.
+    """
+    created_items = []
+
+    try:
+        with SessionLocal() as db:
+            for menu_item in menu_items:
+                new_item = MenuItem(
+                    name=menu_item.name,
+                    description=menu_item.description,
+                    price=menu_item.price,
+                    available=menu_item.available,
+                    category=menu_item.category,
+                    created_at=datetime.now(timezone.utc),
+                    updated_at=datetime.now(timezone.utc),
+                )
+                db.add(new_item)
+                created_items.append(new_item)
+
+            db.commit()
+
+            for item in created_items:
+                db.refresh(item)
+
+            logger.info(
+                "Created %s menu items successfully",
+                len(created_items),
+            )
+            return created_items
+
+    except SQLAlchemyError as e:
+        logger.error(
+            "Database error while creating menu items: %s",
+            e,
+            exc_info=True,
+        )
+        raise
+
+
+def hard_delete_all_menu_items():
+    """
+    Elimina permanentemente todas las entradas del menú de la base de datos.
+    """
+    try:
+        with SessionLocal() as db:
+            deleted_count = db.query(MenuItem).delete()
+            db.commit()
+
+            logger.info("Hard-deleted %s menu items", deleted_count)
+            return deleted_count
+
+    except SQLAlchemyError as e:
+        logger.error(
+            "Database error while hard-deleting all menu items: %s",
+            e,
+            exc_info=True,
+        )
+        raise
