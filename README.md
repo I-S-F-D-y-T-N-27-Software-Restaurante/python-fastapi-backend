@@ -20,6 +20,16 @@ make run
 
 ## Manually
 
+### Crear venv
+
+```cmd
+
+python -m venv venv
+
+```
+
+## Activación
+
 ### Linux/macOS
 
 ```sh
